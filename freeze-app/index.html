@@ -1,18 +1,25 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ilmsfreeze</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="Description" content="NTHU iLMS frozen in time" />
+    <base href="/" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
+      integrity="sha256-UDtbUHqpVVfXmdJcQVU/bfDEr9xldf3Dbd0ShD0Uf/Y="
+      crossorigin="anonymous"
+    />
+  </head>
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="Description" content="Put your description here.">
-  <base href="/">
-  <title>ilmsfreeze</title>
-</head>
+  <body>
+    <freeze-app></freeze-app>
 
-<body>
-  <freeze-app></freeze-app>
-
-  <script type="module" src="./out/tsc/freeze-app.js"></script>
-</body>
-
+    <script type="module" src="./out/tsc/freeze-app.js"></script>
+  </body>
 </html>

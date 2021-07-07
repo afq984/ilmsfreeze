@@ -1,35 +1,70 @@
-import {LitElement, html} from 'lit';
-import {customElement, property} from 'lit/decorators.js';
+import { LitElement, html } from "lit";
+import { customElement, property } from "lit/decorators.js";
 
-@customElement('freeze-app')
+import "./freeze-navbar";
+
+interface Course {
+  id: string;
+  serial: string;
+  is_admin: string;
+  name: string;
+}
+
+@customElement("freeze-app")
 export class FreezeApp extends LitElement {
-  /**
-   * The name to say "Hello" to.
-   */
-  @property()
-  name = 'World';
+  @property({ attribute: false })
+  courses: Array<Course> = [];
 
-  /**
-   * The number of times the button has been clicked.
-   */
-  @property({type: Number})
-  count = 0;
+  createRenderRoot() {
+    return this;
+  }
 
-  render() {
+  renderTable(items: Array<any>, attrs: Array<string>) {
     return html`
-      <h1>Hello, ${this.name}!</h1>
-      <button @click=${this._onClick} part="button">
-        Click Count: ${this.count}
-      </button>
-      <slot></slot>
+    <table class="table">
+      <tr>
+      ${attrs.map((attr) => html`<th>${attr}</th>`)}
+  </tr>
+  </tr>
+      ${items.map(
+        (item) =>
+          html`<tr>
+            ${attrs.map((attr) => html`<td>${item[attr]}</td>`)}
+          </tr>`
+      )}
+      </table>
     `;
   }
 
-  private _onClick() {
-    this.count++;
+  render() {
+    return html`
+      <freeze-navbar @directory-open=${this._onClick}></freeze-navbar>
+
+      <section class="section">
+        <div class="container">
+          ${this.renderTable(this.courses, [
+            "id",
+            "serial",
+            "is_admin",
+            "name",
+          ])}
+        </div>
+      </section>
+    `;
   }
 
-  foo(): string {
-    return 'foo';
+  private async _onClick() {
+    const rootHandle = await window.showDirectoryPicker();
+    console.log(rootHandle);
+    const courseDir = await rootHandle.getDirectoryHandle("course");
+    let courses = [];
+    for await (const entry of courseDir.values()) {
+      // @ts-ignore
+      const meta = await entry.getFileHandle("meta.json");
+      const file = await meta.getFile();
+      const obj = JSON.parse(await file.text());
+      courses.push(obj);
+    }
+    this.courses = courses;
   }
 }
