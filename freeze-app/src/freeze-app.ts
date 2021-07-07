@@ -1,61 +1,48 @@
 import { LitElement, html } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement } from "lit/decorators.js";
+import { Router } from "@vaadin/router";
 
+import { Course } from "./base-view";
 import "./freeze-navbar";
+import "./freeze-browse";
+import "./freeze-download";
 
-interface Course {
-  id: string;
-  serial: string;
-  is_admin: string;
-  name: string;
+function initRouter(element: any) {
+  const router = new Router(element);
+  router.setRoutes([
+    {
+      path: "/",
+      component: "freeze-browse",
+    },
+    {
+      path: "/download",
+      component: "freeze-download",
+    },
+  ]);
 }
 
 @customElement("freeze-app")
 export class FreezeApp extends LitElement {
-  @property({ attribute: false })
   courses: Array<Course> = [];
 
   createRenderRoot() {
     return this;
   }
 
-  renderTable(items: Array<any>, attrs: Array<string>) {
-    return html`
-    <table class="table">
-      <tr>
-      ${attrs.map((attr) => html`<th>${attr}</th>`)}
-  </tr>
-  </tr>
-      ${items.map(
-        (item) =>
-          html`<tr>
-            ${attrs.map((attr) => html`<td>${item[attr]}</td>`)}
-          </tr>`
-      )}
-      </table>
-    `;
+  firstUpdated() {
+    initRouter(this.renderRoot.querySelector("main"));
   }
 
   render() {
     return html`
       <freeze-navbar @directory-open=${this._onClick}></freeze-navbar>
 
-      <section class="section">
-        <div class="container">
-          ${this.renderTable(this.courses, [
-            "id",
-            "serial",
-            "is_admin",
-            "name",
-          ])}
-        </div>
-      </section>
+      <main class="section" @subscribe=${this._onSubscribe}></main>
     `;
   }
 
   private async _onClick() {
     const rootHandle = await window.showDirectoryPicker();
-    console.log(rootHandle);
     const courseDir = await rootHandle.getDirectoryHandle("course");
     let courses = [];
     for await (const entry of courseDir.values()) {
@@ -65,6 +52,15 @@ export class FreezeApp extends LitElement {
       const obj = JSON.parse(await file.text());
       courses.push(obj);
     }
+
     this.courses = courses;
+    const options = {
+      detail: courses,
+    };
+    this.dispatchEvent(new CustomEvent("course-changed", options));
+  }
+
+  private _onSubscribe(e: CustomEvent) {
+    e.detail(this, this.courses);
   }
 }

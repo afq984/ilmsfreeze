@@ -15,7 +15,7 @@ export class IlNavbar extends LitElement {
     >
       <section class="container">
         <div class="navbar-brand">
-          <a class="navbar-item" href="#">
+          <a class="navbar-item" href="/">
             <strong>ilmsfreeze</strong>
           </a>
 
@@ -34,8 +34,8 @@ export class IlNavbar extends LitElement {
 
         <div id="navbarBasicExample" class="navbar-menu">
           <div class="navbar-start">
-            <a class="navbar-item"> Browse </a>
-            <a class="navbar-item"> Download </a>
+            <a href="/" class="navbar-item">Browse</a>
+            <a href="/download" class="navbar-item">Download</a>
           </div>
 
           <div class="navbar-end">
