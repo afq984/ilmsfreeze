@@ -2,7 +2,6 @@ import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { Router } from "@vaadin/router";
 
-import { Course } from "./base-view";
 import "./freeze-navbar";
 import "./freeze-browse";
 import "./freeze-download";
@@ -23,7 +22,7 @@ function initRouter(element: any) {
 
 @customElement("freeze-app")
 export class FreezeApp extends LitElement {
-  courses: Array<Course> = [];
+  rootHandle?: FileSystemDirectoryHandle;
 
   createRenderRoot() {
     return this;
@@ -43,24 +42,14 @@ export class FreezeApp extends LitElement {
 
   private async _onClick() {
     const rootHandle = await window.showDirectoryPicker();
-    const courseDir = await rootHandle.getDirectoryHandle("course");
-    let courses = [];
-    for await (const entry of courseDir.values()) {
-      // @ts-ignore
-      const meta = await entry.getFileHandle("meta.json");
-      const file = await meta.getFile();
-      const obj = JSON.parse(await file.text());
-      courses.push(obj);
-    }
-
-    this.courses = courses;
+    this.rootHandle = rootHandle;
     const options = {
-      detail: courses,
+      detail: rootHandle,
     };
-    this.dispatchEvent(new CustomEvent("course-changed", options));
+    this.dispatchEvent(new CustomEvent("directory-changed", options));
   }
 
-  private _onSubscribe(e: CustomEvent) {
-    e.detail(this, this.courses);
+  private async _onSubscribe(e: CustomEvent) {
+    await e.detail(this, this.rootHandle);
   }
 }
