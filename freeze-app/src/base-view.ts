@@ -10,40 +10,39 @@ export interface Course {
 
 export class BaseView extends LitElement {
   subscribedTo?: Element;
-  courseChangedListener: EventListener;
+  directoryChangedListener: EventListener;
 
   @property({ attribute: false })
   courses: Array<Course> = [];
 
   constructor() {
     super();
-    this.courseChangedListener = ((e: CustomEvent) => {
-      this.handleCourseChange(e);
-    }) as EventListener;
+    this.directoryChangedListener = async (e: Event) => {
+      await this.handleDirectoryChange(
+        (e as CustomEvent).detail as FileSystemDirectoryHandle
+      );
+    };
   }
 
   createRenderRoot() {
     return this;
   }
 
-  private subscribe(e: Element, courses: Array<Course>) {
+  private async subscribe(e: Element, rootHandle?: FileSystemDirectoryHandle) {
     this.subscribedTo = e;
-    this.courses = courses;
-    this.subscribedTo.addEventListener(
-      "course-changed",
-      this.courseChangedListener
-    );
+    if (rootHandle !== undefined) {
+      await this.handleDirectoryChange(rootHandle);
+    }
+    e.addEventListener("directory-changed", this.directoryChangedListener);
   }
 
-  private handleCourseChange(e: CustomEvent) {
-    this.courses = e.detail;
-  }
+  async handleDirectoryChange(_rootHandle: FileSystemDirectoryHandle) {}
 
   connectedCallback() {
     super.connectedCallback();
     const options = {
-      detail: (e: Element, courses: Array<Course>) => {
-        this.subscribe(e, courses);
+      detail: async (e: Element, rootHandle?: FileSystemDirectoryHandle) => {
+        await this.subscribe(e, rootHandle);
       },
       bubbles: true,
     };
@@ -52,8 +51,8 @@ export class BaseView extends LitElement {
 
   disconnectedCallback() {
     this.subscribedTo?.removeEventListener(
-      "course-changed",
-      this.courseChangedListener
+      "directory-changed",
+      this.directoryChangedListener
     );
   }
 }
