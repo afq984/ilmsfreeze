@@ -33,7 +33,9 @@ export class FreezeBrowse extends BaseView {
     const courseDir = await rootHandle.getDirectoryHandle("course");
     let courses = [];
     for await (const entry of courseDir.values()) {
-      // @ts-ignore
+      if (entry.kind == "file") {
+        continue;
+      }
       const meta = await entry.getFileHandle("meta.json");
       const file = await meta.getFile();
       const obj = JSON.parse(await file.text());
