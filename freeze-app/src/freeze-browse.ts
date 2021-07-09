@@ -9,7 +9,7 @@ export class FreezeBrowse extends BaseView {
   render() {
     const fields = ["id", "serial", "is_admin", "name"];
     return html` <div class="container">
-      <freeze-table .items=${this.courses} .fields=${fields}></freeze-table>
+      <freeze-table sortField="id" .items=${this.courses} .fields=${fields}></freeze-table>
     </div>`;
   }
 
