@@ -5,6 +5,7 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { BaseView, Course } from "./base-view.js";
 import { FileSystemDataSource } from "./data-source.js";
 import { Fragment, homeFragment } from "./freeze-pathbar.js";
+import "./freeze-sidemenu";
 
 @customElement("freeze-course")
 export class FreezeCourse extends BaseView {
@@ -53,6 +54,9 @@ export class FreezeCourse extends BaseView {
     return html`
       <freeze-pathbar .fragments=${this.fragments}></freeze-pathbar>
       <div class="columns">
+        <freeze-sidemenu class="column is-one-fifth" .course=${
+          this.course
+        }"></freeze-sidemenu>
         <div class="column">
           <div class="content">${unsafeHTML(this.body)}</div>
         </div>
