@@ -4,6 +4,12 @@ import { customElement, property } from "lit/decorators.js";
 const symbolAscending = "⬆︎";
 const symbolDescending = "⬇︎";
 
+type AttrFn = (item: any, attr: any) => any;
+export interface TableFields {
+  [key: string]: AttrFn;
+}
+export const textField: AttrFn = (_: any, attr: any) => attr;
+
 @customElement("freeze-table")
 export class FreezeTable extends LitElement {
   createRenderRoot() {
@@ -14,7 +20,7 @@ export class FreezeTable extends LitElement {
   items: Array<any>;
 
   @property({ attribute: false })
-  fields: Array<any>;
+  fields: TableFields;
 
   @property()
   sortField?: string;
@@ -25,7 +31,7 @@ export class FreezeTable extends LitElement {
   constructor() {
     super();
     this.items = [];
-    this.fields = [];
+    this.fields = {};
   }
 
   connectedCallback() {
@@ -63,7 +69,7 @@ export class FreezeTable extends LitElement {
     return html`
     <table class="table">
       <tr>
-      ${this.fields.map(
+      ${Object.keys(this.fields).map(
         (field) =>
           html`<th
             style="cursor: pointer; user-select: none"
@@ -82,7 +88,9 @@ export class FreezeTable extends LitElement {
       ${this.items.map(
         (item) =>
           html`<tr>
-            ${this.fields.map((field) => html`<td>${item[field]}</td>`)}
+            ${Object.entries(this.fields).map(
+              ([field, attrFn]) => html`<td>${attrFn(item, item[field])}</td>`
+            )}
           </tr>`
       )}
       </table>
