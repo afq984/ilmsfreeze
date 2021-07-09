@@ -1,17 +1,17 @@
 // Import rollup plugins
-import html from '@web/rollup-plugin-html';
+import html from "@web/rollup-plugin-html";
 // import {copy} from '@web/rollup-plugin-copy';
-import resolve from '@rollup/plugin-node-resolve';
-import {terser} from 'rollup-plugin-terser';
-import minifyHTML from 'rollup-plugin-minify-html-literals';
-import summary from 'rollup-plugin-summary';
+import resolve from "@rollup/plugin-node-resolve";
+import { terser } from "rollup-plugin-terser";
+import minifyHTML from "rollup-plugin-minify-html-literals";
+import summary from "rollup-plugin-summary";
 
 export default {
   plugins: [
     // Entry point for application build; can specify a glob to build multiple
     // HTML files for non-SPA app
     html({
-      input: 'index.html',
+      input: "index.html",
     }),
     // Resolve bare module specifiers to relative paths
     resolve(),
@@ -31,7 +31,7 @@ export default {
     // }),
   ],
   output: {
-    dir: 'out/dist',
+    dir: "out/dist",
   },
-  preserveEntrySignatures: 'strict',
+  preserveEntrySignatures: "strict",
 };
