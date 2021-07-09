@@ -1,3 +1,4 @@
+import { RouterLocation } from "@vaadin/router";
 import { LitElement } from "lit";
 import { property } from "lit/decorators.js";
 
@@ -11,6 +12,7 @@ export interface Course {
 export class BaseView extends LitElement {
   subscribedTo?: Element;
   directoryChangedListener: EventListener;
+  location?: RouterLocation;
 
   @property({ attribute: false })
   courses: Array<Course> = [];

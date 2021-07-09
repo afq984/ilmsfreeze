@@ -5,6 +5,7 @@ import { Router } from "@vaadin/router";
 import "./freeze-navbar";
 import "./freeze-browse";
 import "./freeze-download";
+import "./freeze-course";
 
 function initRouter(element: any) {
   const router = new Router(element);
@@ -17,6 +18,10 @@ function initRouter(element: any) {
       path: "/download",
       component: "freeze-download",
     },
+    {
+      path: "/course/:course_id",
+      component: "freeze-course",
+    }
   ]);
 }
 
