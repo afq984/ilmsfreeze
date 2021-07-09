@@ -1,0 +1,30 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - run: npm ci
+        working-directory: freeze-app
+      - run: npm run lint
+        working-directory: freeze-app
+
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - run: npm ci
+        working-directory: freeze-app
+      - run: npm run format:check
+        working-directory: freeze-app
