@@ -26,7 +26,7 @@ export class FreezeTable extends LitElement {
   sortField?: string;
 
   @property({ type: Boolean })
-  sortDescending: boolean = false;
+  sortDescending = false;
 
   constructor() {
     super();

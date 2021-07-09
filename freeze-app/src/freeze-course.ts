@@ -14,7 +14,7 @@ export class FreezeCourse extends BaseView {
   course?: Course;
 
   @property({ attribute: false })
-  body: string = "";
+  body = "";
 
   connectedCallback() {
     if (this.location !== undefined) {
