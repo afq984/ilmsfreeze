@@ -8,6 +8,7 @@
     "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\"",
     "lint": "lit-analyzer && eslint 'src/**/*.ts'",
     "format": "prettier \"**/*.{js,mjs,ts}\" --ignore-path .gitignore --write",
+    "format:check": "prettier \"**/*.{js,mjs,ts}\" --ignore-path .gitignore --check",
     "deploy-to-gh-pages": "cd out/dist && echo ilmsfreeze.afq984.org > CNAME && git init -b gh-pages && git add . && git commit -m \"npm run deploy-to-gh-pages\" && git push --force git@github.com:afq984/ilmsfreeze gh-pages"
   },
   "devDependencies": {
