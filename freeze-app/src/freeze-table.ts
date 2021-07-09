@@ -31,7 +31,7 @@ export class FreezeTable extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     if (this.sortField !== undefined) {
-      this.sort(this.sortField, this.sortDescending);
+      this.sort();
     }
   }
 
