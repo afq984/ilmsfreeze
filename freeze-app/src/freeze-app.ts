@@ -7,7 +7,7 @@ import "./freeze-browse";
 import "./freeze-download";
 import "./freeze-course";
 
-function initRouter(element: any) {
+function initRouter(element: Element) {
   const router = new Router(element);
   router.setRoutes([
     {
@@ -34,7 +34,10 @@ export class FreezeApp extends LitElement {
   }
 
   firstUpdated() {
-    initRouter(this.renderRoot.querySelector("main"));
+    const main = this.renderRoot.querySelector("main");
+    if (main !== null) {
+      initRouter(main);
+    }
   }
 
   render() {
