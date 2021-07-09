@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rimraf out && tsc && rollup -c rollup.config.js",
     "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\"",
-    "lint": "eslint 'src/**/*.ts'",
+    "lint": "lit-analyzer && eslint 'src/**/*.ts'",
     "format": "prettier \"**/*.{js,mjs,ts}\" --ignore-path .gitignore --write",
     "deploy-to-gh-pages": "cd out/dist && echo ilmsfreeze.afq984.org > CNAME && git init -b gh-pages && git add . && git commit -m \"npm run deploy-to-gh-pages\" && git push --force git@github.com:afq984/ilmsfreeze gh-pages"
   },
@@ -20,6 +20,7 @@
     "concurrently": "^6.2.0",
     "deepmerge": "^4.2.2",
     "eslint": "^7.30.0",
+    "lit-analyzer": "^1.2.1",
     "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
     "rollup": "^2.52.7",
