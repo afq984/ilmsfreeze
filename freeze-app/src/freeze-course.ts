@@ -4,6 +4,7 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import { BaseView, Course } from "./base-view.js";
 import { FileSystemDataSource } from "./data-source.js";
+import { Fragment, homeFragment } from "./freeze-pathbar.js";
 
 @customElement("freeze-course")
 export class FreezeCourse extends BaseView {
@@ -15,6 +16,14 @@ export class FreezeCourse extends BaseView {
 
   @property({ attribute: false })
   body = "";
+
+  @property({ attribute: false })
+  fragments: Array<Fragment>;
+
+  constructor() {
+    super();
+    this.fragments = [];
+  }
 
   connectedCallback() {
     if (this.location !== undefined) {
@@ -30,9 +39,24 @@ export class FreezeCourse extends BaseView {
     const source = new FileSystemDataSource(rootHandle);
     this.course = await source.getMeta("course", this.course_id);
     this.body = await source.getText("course", this.course_id, "index.html");
+    this.fragments = [
+      homeFragment,
+      {
+        text: (this.course as Course).name,
+        href: `/course/${this.course_id}`,
+        active: true,
+      },
+    ];
   }
 
   render() {
-    return html`<div class="content">${unsafeHTML(this.body)}</div>`;
+    return html`
+      <freeze-pathbar .fragments=${this.fragments}></freeze-pathbar>
+      <div class="columns">
+        <div class="column">
+          <div class="content">${unsafeHTML(this.body)}</div>
+        </div>
+      </div>
+    `;
   }
 }

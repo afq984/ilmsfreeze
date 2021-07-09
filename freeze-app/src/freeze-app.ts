@@ -44,7 +44,9 @@ export class FreezeApp extends LitElement {
     return html`
       <freeze-navbar @directory-open=${this._onClick}></freeze-navbar>
 
-      <main class="section" @subscribe=${this._onSubscribe}></main>
+      <div class="section">
+        <main class="container" @subscribe=${this._onSubscribe}></main>
+      </div>
     `;
   }
 
