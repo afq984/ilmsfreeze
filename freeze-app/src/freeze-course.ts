@@ -54,9 +54,10 @@ export class FreezeCourse extends BaseView {
     return html`
       <freeze-pathbar .fragments=${this.fragments}></freeze-pathbar>
       <div class="columns">
-        <freeze-sidemenu class="column is-one-fifth" .course=${
-          this.course
-        }"></freeze-sidemenu>
+        <freeze-sidemenu
+          class="column is-one-fifth"
+          .course=${this.course}
+        ></freeze-sidemenu>
         <div class="column">
           <div class="content">${unsafeHTML(this.body)}</div>
         </div>
