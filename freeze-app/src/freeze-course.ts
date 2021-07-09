@@ -1,5 +1,6 @@
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import { BaseView, Course } from "./base-view.js";
 import { FileSystemDataSource } from "./data-source.js";
@@ -11,6 +12,9 @@ export class FreezeCourse extends BaseView {
 
   @property({ attribute: false })
   course?: Course;
+
+  @property({ attribute: false })
+  body: string = "";
 
   connectedCallback() {
     if (this.location !== undefined) {
@@ -25,10 +29,10 @@ export class FreezeCourse extends BaseView {
     }
     const source = new FileSystemDataSource(rootHandle);
     this.course = await source.getMeta("course", this.course_id);
+    this.body = await source.getText("course", this.course_id, "index.html");
   }
 
   render() {
-    return html` <h2 class="title is-2">Course ${this.course_id}</h2>
-      <p>${JSON.stringify(this.course)}</p>`;
+    return html`<div class="content">${unsafeHTML(this.body)}</div>`;
   }
 }
