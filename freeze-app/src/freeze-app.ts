@@ -21,7 +21,7 @@ function initRouter(element: any) {
     {
       path: "/course/:course_id",
       component: "freeze-course",
-    }
+    },
   ]);
 }
 

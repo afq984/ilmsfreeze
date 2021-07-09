@@ -2,18 +2,19 @@ import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 import { BaseView, Course } from "./base-view.js";
+import { FileSystemDataSource } from "./data-source.js";
 
 @customElement("freeze-course")
 export class FreezeCourse extends BaseView {
-  @property()
-  course_id?: string;
+  @property({ type: Number })
+  course_id?: number;
 
   @property({ attribute: false })
   course?: Course;
 
   connectedCallback() {
     if (this.location !== undefined) {
-      this.course_id = this.location.params.course_id.toString();
+      this.course_id = parseInt(this.location.params.course_id.toString());
     }
     super.connectedCallback();
   }
@@ -22,12 +23,8 @@ export class FreezeCourse extends BaseView {
     if (this.course_id === undefined) {
       return;
     }
-    const meta = await (
-      await (
-        await rootHandle.getDirectoryHandle("course")
-      ).getDirectoryHandle(this.course_id)
-    ).getFileHandle("meta.json");
-    this.course = JSON.parse(await (await meta.getFile()).text());
+    const source = new FileSystemDataSource(rootHandle);
+    this.course = await source.getMeta("course", this.course_id);
   }
 
   render() {
