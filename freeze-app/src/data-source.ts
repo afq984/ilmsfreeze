@@ -12,9 +12,13 @@ export class FileSystemDataSource {
     return await fileHandle.getFile();
   }
 
+  async getText(typename: string, id: number, filename: string) {
+    const file = await this.get(typename, id, filename);
+    return await file.text();
+  }
+
   async getMeta(typename: string, id: number) {
-    const file = await this.get(typename, id, "meta.json");
-    return await JSON.parse(await file.text());
+    return await JSON.parse(await this.getText(typename, id, "meta.json"));
   }
 
   async getAllMeta(typename: string) {
