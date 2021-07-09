@@ -1,5 +1,6 @@
 import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
+import { createRef, Ref, ref } from "lit/directives/ref.js";
 import { Router } from "@vaadin/router";
 
 import "./freeze-navbar";
@@ -28,16 +29,14 @@ function initRouter(element: Element) {
 @customElement("freeze-app")
 export class FreezeApp extends LitElement {
   rootHandle?: FileSystemDirectoryHandle;
+  mainRef: Ref<Element> = createRef();
 
   createRenderRoot() {
     return this;
   }
 
   firstUpdated() {
-    const main = this.renderRoot.querySelector("main");
-    if (main !== null) {
-      initRouter(main);
-    }
+    initRouter(this.mainRef.value!);
   }
 
   render() {
@@ -45,7 +44,11 @@ export class FreezeApp extends LitElement {
       <freeze-navbar @directory-open=${this._onClick}></freeze-navbar>
 
       <div class="section">
-        <main class="container" @subscribe=${this._onSubscribe}></main>
+        <main
+          ${ref(this.mainRef)}
+          class="container"
+          @subscribe=${this._onSubscribe}
+        ></main>
       </div>
     `;
   }
