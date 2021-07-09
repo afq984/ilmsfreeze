@@ -62,10 +62,13 @@ export class FreezeTable extends LitElement {
     }
   }
 
-  render() {
+  willUpdate() {
     if (this.sortField !== undefined) {
       this.sort();
     }
+  }
+
+  render() {
     return html`
     <table class="table">
       <tr>
