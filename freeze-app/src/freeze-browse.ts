@@ -2,6 +2,7 @@ import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 
 import { BaseView } from "./base-view.js";
+import { FileSystemDataSource } from "./data-source.js";
 import { TableFields, textField } from "./freeze-table";
 
 @customElement("freeze-browse")
@@ -25,19 +26,7 @@ export class FreezeBrowse extends BaseView {
   }
 
   async handleDirectoryChange(rootHandle: FileSystemDirectoryHandle) {
-    await super.handleDirectoryChange(rootHandle);
-    const courseDir = await rootHandle.getDirectoryHandle("course");
-    let courses = [];
-    for await (const entry of courseDir.values()) {
-      if (entry.kind == "file") {
-        continue;
-      }
-      const meta = await entry.getFileHandle("meta.json");
-      const file = await meta.getFile();
-      const obj = JSON.parse(await file.text());
-      courses.push(obj);
-    }
-
-    this.courses = courses;
+    const source = new FileSystemDataSource(rootHandle);
+    this.courses = await source.getAllMeta("course");
   }
 }
