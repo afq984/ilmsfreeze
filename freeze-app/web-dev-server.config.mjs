@@ -1,4 +1,4 @@
 export default {
   nodeResolve: true,
-  appIndex: 'index.html',
-}
+  appIndex: "index.html",
+};
