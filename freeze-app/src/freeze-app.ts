@@ -1,46 +1,47 @@
 import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { createRef, Ref, ref } from "lit/directives/ref.js";
-import { Router } from "@vaadin/router";
 
 import "./freeze-navbar";
 import "./freeze-browse";
 import "./freeze-download";
 import "./freeze-course";
-
-function initRouter(element: Element) {
-  const router = new Router(element);
-  router.setRoutes([
-    {
-      path: "/",
-      component: "freeze-browse",
-    },
-    {
-      path: "/download",
-      component: "freeze-download",
-    },
-    {
-      path: "/course/:course_id",
-      component: "freeze-course",
-    },
-    {
-      path: "/course/:course_id/:bla",
-      component: "freeze-course",
-    },
-  ]);
-}
+import { FileSystemDataSource, RouterSource } from "./data-source";
 
 @customElement("freeze-app")
 export class FreezeApp extends LitElement {
   rootHandle?: FileSystemDirectoryHandle;
   mainRef: Ref<Element> = createRef();
+  router?: RouterSource;
 
   createRenderRoot() {
     return this;
   }
 
   firstUpdated() {
-    initRouter(this.mainRef.value!);
+    this.initRouter(this.mainRef.value!);
+  }
+
+  initRouter(element: Element) {
+    this.router = new RouterSource(element);
+    this.router.setRoutes([
+      {
+        path: "/",
+        component: "freeze-browse",
+      },
+      {
+        path: "/download",
+        component: "freeze-download",
+      },
+      {
+        path: "/course/:course_id",
+        component: "freeze-course",
+      },
+      {
+        path: "/course/:course_id/:bla",
+        component: "freeze-course",
+      },
+    ]);
   }
 
   render() {
@@ -63,6 +64,7 @@ export class FreezeApp extends LitElement {
     const options = {
       detail: rootHandle,
     };
+    this.router!.dataSource = new FileSystemDataSource(rootHandle);
     this.dispatchEvent(new CustomEvent("directory-changed", options));
   }
 
