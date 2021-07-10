@@ -1,6 +1,6 @@
 import { RouterLocation } from "@vaadin/router";
 import { html } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import { BaseView, CourseMeta } from "./base-view.js";
@@ -10,16 +10,11 @@ import "./freeze-sidemenu";
 
 @customElement("freeze-course")
 export class FreezeCourse extends BaseView {
-  @property({ type: Number })
-  course_id?: number;
-
-  @property({ attribute: false })
+  @state()
   courseMeta?: CourseMeta;
-
-  @property({ attribute: false })
+  @state()
   body = "";
-
-  @property({ attribute: false })
+  @state()
   fragments: Array<Fragment>;
 
   constructor() {
@@ -29,18 +24,17 @@ export class FreezeCourse extends BaseView {
 
   async onBeforeEnter(location: RouterLocation, _: any, router: RouterSource) {
     const source = router.dataSource!;
-    this.course_id = parseInt(location.params.course_id.toString());
-    this.courseMeta = await source.getMeta("course", this.course_id);
-    this.body = await source.getText("course", this.course_id, "index.html");
+    const course_id = parseInt(location.params.course_id.toString());
+    this.courseMeta = await source.getMeta("course", course_id);
+    this.body = await source.getText("course", course_id, "index.html");
     this.fragments = [
       homeFragment,
       {
         text: this.courseMeta!.name,
-        href: `/course/${this.course_id}`,
+        href: `/course/${course_id}`,
         active: true,
       },
     ];
-    console.log("onbeforeenter");
   }
 
   render() {
