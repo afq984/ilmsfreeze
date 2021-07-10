@@ -41,3 +41,10 @@ export interface DiscussionMeta {
   course: string;
   children: Array<string>;
 }
+
+export interface HomeworkMeta {
+  id: number;
+  title: string;
+  course: string;
+  children: Array<string>;
+}
