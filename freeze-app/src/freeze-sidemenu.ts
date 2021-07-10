@@ -1,7 +1,7 @@
 import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import { CourseMeta } from "./base-view";
+import { CourseMeta } from "./types";
 
 interface MenuItem {
   typename?: string;

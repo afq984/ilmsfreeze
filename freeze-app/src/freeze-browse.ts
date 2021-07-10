@@ -1,14 +1,18 @@
 import { html } from "lit";
-import { customElement } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 
 import { BaseView } from "./base-view.js";
 import { FileSystemDataSource } from "./data-source.js";
 import { TableFields, textField } from "./freeze-table";
 import "./freeze-pathbar";
 import { Fragment, homeFragment } from "./freeze-pathbar";
+import { CourseMeta } from "./types.js";
 
 @customElement("freeze-browse")
 export class FreezeBrowse extends BaseView {
+  @property({ attribute: false })
+  courses: Array<CourseMeta> = [];
+
   render() {
     const linkfn = (item: any, attr: any) =>
       html`<a href="/course/${item.id}">${attr}</a>`;
