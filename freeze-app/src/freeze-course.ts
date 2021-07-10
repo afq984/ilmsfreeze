@@ -67,6 +67,7 @@ class FreezeCourseBase extends BaseView {
           .courseMeta=${this.courseMeta}
           .courseChildren=${this.courseChildren}
           .activeUrl=${this.activeUrl}
+          .router=${this.router}
         ></freeze-sidemenu>
         <div class="column">${this.renderBody()}</div>
       </div>

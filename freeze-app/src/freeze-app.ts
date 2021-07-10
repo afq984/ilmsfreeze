@@ -6,6 +6,7 @@ import "./freeze-navbar";
 import "./freeze-browse";
 import "./freeze-download";
 import "./freeze-course";
+import { routes } from "./routes";
 import { FileSystemDataSource, RouterSource } from "./data-source";
 
 @customElement("freeze-app")
@@ -24,44 +25,7 @@ export class FreezeApp extends LitElement {
 
   initRouter(element: Element) {
     this.router = new RouterSource(element);
-    this.router.setRoutes([
-      {
-        path: "/",
-        component: "freeze-browse",
-      },
-      {
-        path: "/download",
-        component: "freeze-download",
-      },
-      {
-        path: "/course/:course_id",
-        component: "freeze-course",
-      },
-      {
-        path: "/course/:course_id/announcement",
-        component: "freeze-course-announcements",
-      },
-      {
-        path: "/course/:course_id/material",
-        component: "freeze-course-materials",
-      },
-      {
-        path: "/course/:course_id/discussion",
-        component: "freeze-course-discussions",
-      },
-      {
-        path: "/course/:course_id/homework",
-        component: "freeze-course-homeworks",
-      },
-      {
-        path: "/course/:course_id/score",
-        component: "freeze-course-score",
-      },
-      {
-        path: "/course/:course_id/grouplist",
-        component: "freeze-course-grouplist",
-      },
-    ]);
+    this.router.setRoutes(routes);
   }
 
   render() {
