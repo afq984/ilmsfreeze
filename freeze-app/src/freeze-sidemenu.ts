@@ -1,6 +1,7 @@
 import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
+import { RouterSource } from "./data-source";
 
 import { ChildrenMap, CourseMeta } from "./types";
 
@@ -63,12 +64,14 @@ export class FreezeSidemenu extends LitElement {
   courseMeta?: CourseMeta;
   @property({ attribute: false })
   courseChildren?: ChildrenMap;
+  @property({ attribute: false })
+  activeUrl?: string;
 
   renderLink(meta: CourseMeta, item: MenuItem) {
     const children = this.courseChildren!;
     const url = getLink(meta.id, item);
     const classes = {
-      active: false, // TODO
+      "is-active": url === this.activeUrl,
       "side-menu-disabled":
         item.typename !== undefined && !(item.typename in children),
     };
@@ -76,7 +79,6 @@ export class FreezeSidemenu extends LitElement {
     if (item.typename !== undefined && item.countable) {
       text = `${text} (${(children[item.typename] || []).length})`;
     }
-    console.log(classes);
     return html`<a href="${url}" class="${classMap(classes)}">${text}</a>`;
   }
 

@@ -25,6 +25,8 @@ class FreezeCourseBase extends BaseView {
   courseChildren?: ChildrenMap;
   @state()
   fragments: Array<Fragment>;
+  activeUrl?: string;
+  router?: RouterSource;
 
   constructor() {
     super();
@@ -32,6 +34,8 @@ class FreezeCourseBase extends BaseView {
   }
 
   async onBeforeEnter(location: RouterLocation, _: any, router: RouterSource) {
+    this.router = router;
+    this.activeUrl = location.pathname;
     await this.prepareState(location, router.dataSource!);
   }
 
@@ -62,6 +66,7 @@ class FreezeCourseBase extends BaseView {
           class="column is-one-fifth"
           .courseMeta=${this.courseMeta}
           .courseChildren=${this.courseChildren}
+          .activeUrl=${this.activeUrl}
         ></freeze-sidemenu>
         <div class="column">${this.renderBody()}</div>
       </div>
