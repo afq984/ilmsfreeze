@@ -28,3 +28,16 @@ jobs:
         working-directory: freeze-app
       - run: npm run format:check
         working-directory: freeze-app
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - run: npm ci
+        working-directory: freeze-app
+      - run: npm run build
+        working-directory: freeze-app
