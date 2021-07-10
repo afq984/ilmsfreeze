@@ -38,8 +38,8 @@ export class FreezeApp extends LitElement {
         component: "freeze-course",
       },
       {
-        path: "/course/:course_id/:bla",
-        component: "freeze-course",
+        path: "/course/:course_id/announcement",
+        component: "freeze-course-announcements",
       },
     ]);
   }
