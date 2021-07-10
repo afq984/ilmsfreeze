@@ -26,3 +26,11 @@ export interface AnnouncementMeta {
   course: string;
   children: Array<string>;
 }
+
+export interface MaterialMeta {
+  id: number;
+  title: string;
+  type: string;
+  course: string;
+  children: Array<String>;
+}

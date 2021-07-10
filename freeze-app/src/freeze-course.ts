@@ -12,6 +12,7 @@ import {
   AnnouncementMeta,
   ChildrenMap,
   CourseMeta,
+  MaterialMeta,
   parseChildren,
 } from "./types.js";
 
@@ -104,6 +105,34 @@ export class FreezeCouseAnnouncements extends FreezeCourseBase {
     };
     return html`<freeze-table
       .items=${this.announcements}
+      .fields=${fields}
+      .sortDescending=${true}
+      .sortField=${"id"}
+    ></freeze-table>`;
+  }
+}
+
+@customElement("freeze-course-materials")
+export class FreezeCourseMaterials extends FreezeCourseBase {
+  @state()
+  materials: Array<MaterialMeta> = [];
+
+  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+    await super.prepareState(location, source);
+    this.materials = await source.getMetas(
+      "material",
+      this.courseChildren!.material
+    );
+  }
+
+  renderBody() {
+    const fields = {
+      id: textField,
+      title: textField,
+      type: textField,
+    };
+    return html`<freeze-table
+      .items=${this.materials}
       .fields=${fields}
       .sortDescending=${true}
       .sortField=${"id"}
