@@ -23,6 +23,17 @@ export class FileSystemDataSource {
     return JSON.parse(await this.getText(typename, id, "meta.json"));
   }
 
+  async getMetas(typename: string, ids: Array<number> | undefined) {
+    if (ids === undefined) {
+      return [];
+    }
+    const result = [];
+    for (const id of ids) {
+      result.push(await this.getMeta(typename, id));
+    }
+    return result;
+  }
+
   async getAllMeta(typename: string) {
     const result = [];
     const typeDir = await this.rootHandle.getDirectoryHandle(typename);

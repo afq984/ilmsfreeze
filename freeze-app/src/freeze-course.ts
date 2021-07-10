@@ -7,10 +7,14 @@ import { BaseView, CourseMeta } from "./base-view.js";
 import { FileSystemDataSource, RouterSource } from "./data-source.js";
 import { Fragment, homeFragment } from "./freeze-pathbar.js";
 import "./freeze-sidemenu";
+import { textField } from "./freeze-table.js";
+import { AnnouncementMeta, ChildrenMap, parseChildren } from "./types.js";
 
 class FreezeCourseBase extends BaseView {
   @state()
   courseMeta?: CourseMeta;
+  @state()
+  courseChildren?: ChildrenMap;
   @state()
   fragments: Array<Fragment>;
 
@@ -26,6 +30,7 @@ class FreezeCourseBase extends BaseView {
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
     const course_id = parseInt(location.params.course_id.toString());
     this.courseMeta = await source.getMeta("course", course_id);
+    this.courseChildren = parseChildren(this.courseMeta!.children);
     this.fragments = [
       homeFragment,
       {
@@ -49,9 +54,7 @@ class FreezeCourseBase extends BaseView {
           class="column is-one-fifth"
           .courseMeta=${this.courseMeta}
         ></freeze-sidemenu>
-        <div class="column">
-          <div class="content">${this.renderBody()}</div>
-        </div>
+        <div class="column">${this.renderBody()}</div>
       </div>
     `;
   }
@@ -72,6 +75,33 @@ export class FreezeCourseOverview extends FreezeCourseBase {
   }
 
   renderBody() {
-    return unsafeHTML(this.body);
+    return html`<div class="content">${unsafeHTML(this.body)}</div>`;
+  }
+}
+
+@customElement("freeze-course-announcements")
+export class FreezeCouseAnnouncements extends FreezeCourseBase {
+  @state()
+  announcements: Array<AnnouncementMeta> = [];
+
+  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+    await super.prepareState(location, source);
+    this.announcements = await source.getMetas(
+      "announcement",
+      this.courseChildren!.announcement
+    );
+  }
+
+  renderBody() {
+    const fields = {
+      id: textField,
+      title: textField,
+    };
+    return html`<freeze-table
+      .items=${this.announcements}
+      .fields=${fields}
+      .sortDescending=${true}
+      .sortField=${"id"}
+    ></freeze-table>`;
   }
 }
