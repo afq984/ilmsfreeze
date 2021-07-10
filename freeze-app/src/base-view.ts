@@ -1,10 +1,13 @@
 import { RouterLocation } from "@vaadin/router";
 import { LitElement } from "lit";
+import { FileSystemDataSource, RouterSource } from "./data-source";
 
-export class BaseView extends LitElement {
+export abstract class BaseView extends LitElement {
   subscribedTo?: Element;
   directoryChangedListener: EventListener;
   location?: RouterLocation;
+  activeUrl?: string;
+  router?: RouterSource;
 
   constructor() {
     super();
@@ -18,6 +21,17 @@ export class BaseView extends LitElement {
   createRenderRoot() {
     return this;
   }
+
+  async onBeforeEnter(location: RouterLocation, _: any, router: RouterSource) {
+    this.router = router;
+    this.activeUrl = location.pathname;
+    await this.prepareState(location, router.dataSource!);
+  }
+
+  async prepareState(
+    _location: RouterLocation,
+    _source: FileSystemDataSource
+  ) {}
 
   private async subscribe(e: Element, rootHandle?: FileSystemDirectoryHandle) {
     this.subscribedTo = e;
