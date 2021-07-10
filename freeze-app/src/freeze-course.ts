@@ -12,6 +12,7 @@ import {
   AnnouncementMeta,
   ChildrenMap,
   CourseMeta,
+  DiscussionMeta,
   MaterialMeta,
   parseChildren,
 } from "./types.js";
@@ -125,5 +126,14 @@ export class FreezeCouseMaterials extends FreezeCourseTable<MaterialMeta> {
     id: textField,
     title: textField,
     type: textField,
+  };
+}
+
+@customElement("freeze-course-discussions")
+export class FreezeCouseDiscussions extends FreezeCourseTable<DiscussionMeta> {
+  typename = "discussion";
+  fields = {
+    id: textField,
+    title: textField,
   };
 }
