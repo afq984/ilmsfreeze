@@ -32,5 +32,12 @@ export interface MaterialMeta {
   title: string;
   type: string;
   course: string;
-  children: Array<String>;
+  children: Array<string>;
+}
+
+export interface DiscussionMeta {
+  id: number;
+  title: string;
+  course: string;
+  children: Array<string>;
 }
