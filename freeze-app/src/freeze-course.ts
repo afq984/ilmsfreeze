@@ -13,6 +13,7 @@ import {
   ChildrenMap,
   CourseMeta,
   DiscussionMeta,
+  HomeworkMeta,
   MaterialMeta,
   parseChildren,
 } from "./types.js";
@@ -132,6 +133,15 @@ export class FreezeCouseMaterials extends FreezeCourseTable<MaterialMeta> {
 @customElement("freeze-course-discussions")
 export class FreezeCouseDiscussions extends FreezeCourseTable<DiscussionMeta> {
   typename = "discussion";
+  fields = {
+    id: textField,
+    title: textField,
+  };
+}
+
+@customElement("freeze-course-homeworks")
+export class FzeezeCourseHomeworks extends FreezeCourseTable<HomeworkMeta> {
+  typename = "homework";
   fields = {
     id: textField,
     title: textField,
