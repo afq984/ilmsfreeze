@@ -101,6 +101,18 @@ export class FreezeCourseScore extends FreezeCourseBody {
   }
 }
 
+@customElement("freeze-course-grouplist")
+export class FreezeCourseGrouplist extends FreezeCourseBody {
+  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+    await super.prepareState(location, source);
+    this.body = await source.getText(
+      "grouplist",
+      this.courseMeta!.id,
+      "index.html"
+    );
+  }
+}
+
 abstract class FreezeCourseTable<T> extends FreezeCourseBase {
   @state()
   table: Array<T> = [];
