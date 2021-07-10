@@ -1,7 +1,7 @@
 import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import { Course } from "./base-view";
+import { CourseMeta } from "./base-view";
 
 interface MenuItem {
   typename?: string;
@@ -59,16 +59,17 @@ export class FreezeSidemenu extends LitElement {
   }
 
   @property({ attribute: false })
-  course?: Course;
+  courseMeta?: CourseMeta;
 
   render() {
+    const meta = this.courseMeta!;
     return html`<aside class="menu">
-      <p class="menu-label">${this.course?.serial}</p>
+      <p class="menu-label">${meta.serial}</p>
       <ul class="menu-list">
         ${menuItems.map(
           (item) => html`
             <li>
-              <a href=${getLink(this.course!.id, item)}> ${item.name} </a>
+              <a href=${getLink(meta.id, item)}> ${item.name} </a>
             </li>
           `
         )}

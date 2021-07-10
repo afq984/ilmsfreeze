@@ -2,11 +2,12 @@ import { RouterLocation } from "@vaadin/router";
 import { LitElement } from "lit";
 import { property } from "lit/decorators.js";
 
-export interface Course {
+export interface CourseMeta {
   id: number;
   serial: string;
   is_admin: string;
   name: string;
+  children: Array<string>;
 }
 
 export class BaseView extends LitElement {
@@ -15,7 +16,7 @@ export class BaseView extends LitElement {
   location?: RouterLocation;
 
   @property({ attribute: false })
-  courses: Array<Course> = [];
+  courses: Array<CourseMeta> = [];
 
   constructor() {
     super();
