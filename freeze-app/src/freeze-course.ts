@@ -68,11 +68,17 @@ class FreezeCourseBase extends BaseView {
   }
 }
 
-@customElement("freeze-course")
-export class FreezeCourseOverview extends FreezeCourseBase {
+abstract class FreezeCourseBody extends FreezeCourseBase {
   @state()
   body = "";
 
+  renderBody() {
+    return html`<div class="content">${unsafeHTML(this.body)}</div>`;
+  }
+}
+
+@customElement("freeze-course")
+export class FreezeCourseOverview extends FreezeCourseBody {
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
     await super.prepareState(location, source);
     this.body = await source.getText(
@@ -81,9 +87,17 @@ export class FreezeCourseOverview extends FreezeCourseBase {
       "index.html"
     );
   }
+}
 
-  renderBody() {
-    return html`<div class="content">${unsafeHTML(this.body)}</div>`;
+@customElement("freeze-course-score")
+export class FreezeCourseScore extends FreezeCourseBody {
+  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+    await super.prepareState(location, source);
+    this.body = await source.getText(
+      "score",
+      this.courseMeta!.id,
+      "index.html"
+    );
   }
 }
 
