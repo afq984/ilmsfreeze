@@ -4,16 +4,13 @@ import { customElement, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import { BaseView, CourseMeta } from "./base-view.js";
-import { RouterSource } from "./data-source.js";
+import { FileSystemDataSource, RouterSource } from "./data-source.js";
 import { Fragment, homeFragment } from "./freeze-pathbar.js";
 import "./freeze-sidemenu";
 
-@customElement("freeze-course")
-export class FreezeCourse extends BaseView {
+class FreezeCourseBase extends BaseView {
   @state()
   courseMeta?: CourseMeta;
-  @state()
-  body = "";
   @state()
   fragments: Array<Fragment>;
 
@@ -23,10 +20,12 @@ export class FreezeCourse extends BaseView {
   }
 
   async onBeforeEnter(location: RouterLocation, _: any, router: RouterSource) {
-    const source = router.dataSource!;
+    await this.prepareState(location, router.dataSource!);
+  }
+
+  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
     const course_id = parseInt(location.params.course_id.toString());
     this.courseMeta = await source.getMeta("course", course_id);
-    this.body = await source.getText("course", course_id, "index.html");
     this.fragments = [
       homeFragment,
       {
@@ -36,6 +35,8 @@ export class FreezeCourse extends BaseView {
       },
     ];
   }
+
+  renderBody() {}
 
   render() {
     if (this.courseMeta === undefined) {
@@ -49,9 +50,28 @@ export class FreezeCourse extends BaseView {
           .courseMeta=${this.courseMeta}
         ></freeze-sidemenu>
         <div class="column">
-          <div class="content">${unsafeHTML(this.body)}</div>
+          <div class="content">${this.renderBody()}</div>
         </div>
       </div>
     `;
+  }
+}
+
+@customElement("freeze-course")
+export class FreezeCourseOverview extends FreezeCourseBase {
+  @state()
+  body = "";
+
+  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+    await super.prepareState(location, source);
+    this.body = await source.getText(
+      "course",
+      this.courseMeta!.id,
+      "index.html"
+    );
+  }
+
+  renderBody() {
+    return unsafeHTML(this.body);
   }
 }
