@@ -23,6 +23,10 @@ function initRouter(element: Element) {
       path: "/course/:course_id",
       component: "freeze-course",
     },
+    {
+      path: "/course/:course_id/:bla",
+      component: "freeze-course",
+    },
   ]);
 }
 

@@ -3,7 +3,7 @@ import { LitElement } from "lit";
 import { property } from "lit/decorators.js";
 
 export interface Course {
-  id: string;
+  id: number;
   serial: string;
   is_admin: string;
   name: string;

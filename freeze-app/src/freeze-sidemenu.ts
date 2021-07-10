@@ -45,6 +45,13 @@ const menuItems: Array<MenuItem> = [
   },
 ];
 
+const getLink = (course_id: number, menuItem: MenuItem) => {
+  if (menuItem.typename === undefined) {
+    return `/course/${course_id}`;
+  }
+  return `/course/${course_id}/${menuItem.typename}`;
+};
+
 @customElement("freeze-sidemenu")
 export class FreezeSidemenu extends LitElement {
   createRenderRoot() {
@@ -61,7 +68,7 @@ export class FreezeSidemenu extends LitElement {
         ${menuItems.map(
           (item) => html`
             <li>
-              <a data-href-TODO> ${item.name} </a>
+              <a href=${getLink(this.course!.id, item)}> ${item.name} </a>
             </li>
           `
         )}
