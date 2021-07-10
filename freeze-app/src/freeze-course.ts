@@ -7,7 +7,7 @@ import { BaseView } from "./base-view.js";
 import { FileSystemDataSource, RouterSource } from "./data-source.js";
 import { Fragment, homeFragment } from "./freeze-pathbar.js";
 import "./freeze-sidemenu";
-import { textField } from "./freeze-table.js";
+import { TableFields, textField } from "./freeze-table.js";
 import {
   AnnouncementMeta,
   ChildrenMap,
@@ -85,57 +85,45 @@ export class FreezeCourseOverview extends FreezeCourseBase {
   }
 }
 
-@customElement("freeze-course-announcements")
-export class FreezeCouseAnnouncements extends FreezeCourseBase {
+abstract class FreezeCourseTable<T> extends FreezeCourseBase {
   @state()
-  announcements: Array<AnnouncementMeta> = [];
+  table: Array<T> = [];
+  abstract typename: string;
+  abstract fields: TableFields;
 
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
     await super.prepareState(location, source);
-    this.announcements = await source.getMetas(
-      "announcement",
-      this.courseChildren!.announcement
+    this.table = await source.getMetas(
+      this.typename,
+      this.courseChildren![this.typename]
     );
   }
 
   renderBody() {
-    const fields = {
-      id: textField,
-      title: textField,
-    };
     return html`<freeze-table
-      .items=${this.announcements}
-      .fields=${fields}
+      .items=${this.table}
+      .fields=${this.fields}
       .sortDescending=${true}
       .sortField=${"id"}
     ></freeze-table>`;
   }
 }
 
+@customElement("freeze-course-announcements")
+export class FreezeCouseAnnouncements extends FreezeCourseTable<AnnouncementMeta> {
+  typename = "announcement";
+  fields = {
+    id: textField,
+    title: textField,
+  };
+}
+
 @customElement("freeze-course-materials")
-export class FreezeCourseMaterials extends FreezeCourseBase {
-  @state()
-  materials: Array<MaterialMeta> = [];
-
-  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
-    await super.prepareState(location, source);
-    this.materials = await source.getMetas(
-      "material",
-      this.courseChildren!.material
-    );
-  }
-
-  renderBody() {
-    const fields = {
-      id: textField,
-      title: textField,
-      type: textField,
-    };
-    return html`<freeze-table
-      .items=${this.materials}
-      .fields=${fields}
-      .sortDescending=${true}
-      .sortField=${"id"}
-    ></freeze-table>`;
-  }
+export class FreezeCouseMaterials extends FreezeCourseTable<MaterialMeta> {
+  typename = "material";
+  fields = {
+    id: textField,
+    title: textField,
+    type: textField,
+  };
 }
