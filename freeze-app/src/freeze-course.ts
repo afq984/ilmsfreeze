@@ -1,9 +1,10 @@
+import { RouterLocation } from "@vaadin/router";
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import { BaseView, CourseMeta } from "./base-view.js";
-import { FileSystemDataSource } from "./data-source.js";
+import { RouterSource } from "./data-source.js";
 import { Fragment, homeFragment } from "./freeze-pathbar.js";
 import "./freeze-sidemenu";
 
@@ -26,18 +27,9 @@ export class FreezeCourse extends BaseView {
     this.fragments = [];
   }
 
-  connectedCallback() {
-    if (this.location !== undefined) {
-      this.course_id = parseInt(this.location.params.course_id.toString());
-    }
-    super.connectedCallback();
-  }
-
-  async handleDirectoryChange(rootHandle: FileSystemDirectoryHandle) {
-    if (this.course_id === undefined) {
-      return;
-    }
-    const source = new FileSystemDataSource(rootHandle);
+  async onBeforeEnter(location: RouterLocation, _: any, router: RouterSource) {
+    const source = router.dataSource!;
+    this.course_id = parseInt(location.params.course_id.toString());
     this.courseMeta = await source.getMeta("course", this.course_id);
     this.body = await source.getText("course", this.course_id, "index.html");
     this.fragments = [
@@ -48,9 +40,13 @@ export class FreezeCourse extends BaseView {
         active: true,
       },
     ];
+    console.log("onbeforeenter");
   }
 
   render() {
+    if (this.courseMeta === undefined) {
+      return html`404`;
+    }
     return html`
       <freeze-pathbar .fragments=${this.fragments}></freeze-pathbar>
       <div class="columns">
