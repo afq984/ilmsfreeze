@@ -61,6 +61,7 @@ class FreezeCourseBase extends BaseView {
         <freeze-sidemenu
           class="column is-one-fifth"
           .courseMeta=${this.courseMeta}
+          .courseChildren=${this.courseChildren}
         ></freeze-sidemenu>
         <div class="column">${this.renderBody()}</div>
       </div>

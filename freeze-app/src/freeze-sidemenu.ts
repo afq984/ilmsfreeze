@@ -1,7 +1,8 @@
 import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { classMap } from "lit/directives/class-map.js";
 
-import { CourseMeta } from "./types";
+import { ChildrenMap, CourseMeta } from "./types";
 
 interface MenuItem {
   typename?: string;
@@ -60,6 +61,24 @@ export class FreezeSidemenu extends LitElement {
 
   @property({ attribute: false })
   courseMeta?: CourseMeta;
+  @property({ attribute: false })
+  courseChildren?: ChildrenMap;
+
+  renderLink(meta: CourseMeta, item: MenuItem) {
+    const children = this.courseChildren!;
+    const url = getLink(meta.id, item);
+    const classes = {
+      active: false, // TODO
+      "side-menu-disabled":
+        item.typename !== undefined && !(item.typename in children),
+    };
+    let text = item.name;
+    if (item.typename !== undefined && item.countable) {
+      text = `${text} (${(children[item.typename] || []).length})`;
+    }
+    console.log(classes);
+    return html`<a href="${url}" class="${classMap(classes)}">${text}</a>`;
+  }
 
   render() {
     const meta = this.courseMeta!;
@@ -67,11 +86,7 @@ export class FreezeSidemenu extends LitElement {
       <p class="menu-label">${meta.serial}</p>
       <ul class="menu-list">
         ${menuItems.map(
-          (item) => html`
-            <li>
-              <a href=${getLink(meta.id, item)}> ${item.name} </a>
-            </li>
-          `
+          (item) => html` <li>${this.renderLink(meta, item)}</li> `
         )}
       </ul>
     </aside>`;
