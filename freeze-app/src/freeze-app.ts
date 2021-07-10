@@ -57,6 +57,10 @@ export class FreezeApp extends LitElement {
         path: "/course/:course_id/score",
         component: "freeze-course-score",
       },
+      {
+        path: "/course/:course_id/grouplist",
+        component: "freeze-course-grouplist",
+      },
     ]);
   }
 
