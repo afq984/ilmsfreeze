@@ -8,7 +8,7 @@ type AttrFn = (item: any, attr: any) => any;
 export interface TableFields {
   [key: string]: AttrFn;
 }
-export const textField: AttrFn = (_: any, attr: any) => attr;
+export const textField: AttrFn = (_item: any, attr: any) => attr;
 
 @customElement("freeze-table")
 export class FreezeTable extends LitElement {

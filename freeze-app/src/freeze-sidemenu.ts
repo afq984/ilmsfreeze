@@ -4,15 +4,15 @@ import { classMap } from "lit/directives/class-map.js";
 
 import { ChildrenMap, CourseMeta } from "./types";
 import { RouterSource } from "./data-source";
-import { menuItems, MenuItem } from "./routes";
+import { menuItems, RouteEntry } from "./routes";
 
 const getLink = (
   router: RouterSource,
   course_id: number,
-  menuItem: MenuItem
+  menuItem: RouteEntry
 ) => {
-  const params = { course_id: course_id.toString() }
-  return router.urlForName(menuItem.name, params);
+  const params = { course_id: course_id.toString() };
+  return router.urlForName(menuItem.component!, params);
 };
 
 @customElement("freeze-sidemenu")
@@ -30,7 +30,7 @@ export class FreezeSidemenu extends LitElement {
   @property({ attribute: false })
   router?: RouterSource;
 
-  renderLink(meta: CourseMeta, item: MenuItem) {
+  renderLink(meta: CourseMeta, item: RouteEntry) {
     const children = this.courseChildren!;
     const url = getLink(this.router!, meta.id, item);
     const classes = {
@@ -38,7 +38,7 @@ export class FreezeSidemenu extends LitElement {
       "side-menu-disabled":
         item.typename !== undefined && !(item.typename in children),
     };
-    let text = item.name;
+    let text = item.displayname;
     if (item.typename !== undefined && item.countable) {
       text = `${text} (${(children[item.typename] || []).length})`;
     }

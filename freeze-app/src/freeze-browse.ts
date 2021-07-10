@@ -14,8 +14,12 @@ export class FreezeBrowse extends BaseView {
   courses: Array<CourseMeta> = [];
 
   render() {
-    const linkfn = (item: any, attr: any) =>
-      html`<a href="/course/${item.id}">${attr}</a>`;
+    const linkfn = (item: CourseMeta, attr: any) => {
+      const url = this.router!.urlForName("freeze-course", {
+        course_id: item.id.toString(),
+      });
+      return html`<a href=${url}>${attr}</a>`;
+    };
     const fields: TableFields = {
       id: linkfn,
       serial: textField,

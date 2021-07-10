@@ -4,7 +4,7 @@ import { customElement, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import { BaseView } from "./base-view.js";
-import { FileSystemDataSource, RouterSource } from "./data-source.js";
+import { FileSystemDataSource } from "./data-source.js";
 import { Fragment, homeFragment } from "./freeze-pathbar.js";
 import "./freeze-sidemenu";
 import { TableFields, textField } from "./freeze-table.js";
@@ -25,18 +25,10 @@ class FreezeCourseBase extends BaseView {
   courseChildren?: ChildrenMap;
   @state()
   fragments: Array<Fragment>;
-  activeUrl?: string;
-  router?: RouterSource;
 
   constructor() {
     super();
     this.fragments = [];
-  }
-
-  async onBeforeEnter(location: RouterLocation, _: any, router: RouterSource) {
-    this.router = router;
-    this.activeUrl = location.pathname;
-    await this.prepareState(location, router.dataSource!);
   }
 
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
