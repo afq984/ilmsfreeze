@@ -3,12 +3,17 @@ import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
-import { BaseView, CourseMeta } from "./base-view.js";
+import { BaseView } from "./base-view.js";
 import { FileSystemDataSource, RouterSource } from "./data-source.js";
 import { Fragment, homeFragment } from "./freeze-pathbar.js";
 import "./freeze-sidemenu";
 import { textField } from "./freeze-table.js";
-import { AnnouncementMeta, ChildrenMap, parseChildren } from "./types.js";
+import {
+  AnnouncementMeta,
+  ChildrenMap,
+  CourseMeta,
+  parseChildren,
+} from "./types.js";
 
 class FreezeCourseBase extends BaseView {
   @state()

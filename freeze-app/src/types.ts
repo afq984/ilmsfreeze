@@ -13,6 +13,13 @@ export const parseChildren = (children: Array<string>) => {
   return result;
 };
 
+export interface CourseMeta {
+  id: number;
+  serial: string;
+  is_admin: string;
+  name: string;
+  children: Array<string>;
+}
 export interface AnnouncementMeta {
   id: number;
   title: string;

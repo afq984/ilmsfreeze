@@ -1,22 +1,10 @@
 import { RouterLocation } from "@vaadin/router";
 import { LitElement } from "lit";
-import { property } from "lit/decorators.js";
-
-export interface CourseMeta {
-  id: number;
-  serial: string;
-  is_admin: string;
-  name: string;
-  children: Array<string>;
-}
 
 export class BaseView extends LitElement {
   subscribedTo?: Element;
   directoryChangedListener: EventListener;
   location?: RouterLocation;
-
-  @property({ attribute: false })
-  courses: Array<CourseMeta> = [];
 
   constructor() {
     super();
