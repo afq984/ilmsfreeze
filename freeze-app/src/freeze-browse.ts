@@ -35,6 +35,7 @@ export class FreezeBrowse extends BaseView {
         <div class="column">
           <freeze-table
             sortField="id"
+            .sortDescending=${true}
             .items=${this.courses}
             .fields=${fields}
           ></freeze-table>
