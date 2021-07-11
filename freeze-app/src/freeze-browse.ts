@@ -5,7 +5,6 @@ import { BaseView } from "./base-view.js";
 import { FileSystemDataSource } from "./data-source.js";
 import { TableFields, textField } from "./freeze-table";
 import "./freeze-pathbar";
-import { Fragment, homeFragment } from "./freeze-pathbar";
 import { CourseMeta } from "./types.js";
 
 @customElement("freeze-browse")
@@ -26,15 +25,7 @@ export class FreezeBrowse extends BaseView {
       is_admin: textField,
       name: linkfn,
     };
-    const fragments: Array<Fragment> = [
-      {
-        text: homeFragment.text,
-        href: homeFragment.href,
-        active: true,
-      },
-    ];
     return html`
-      <freeze-pathbar .fragments=${fragments}></freeze-pathbar>
       <div class="columns">
         <div class="column">
           <freeze-table
