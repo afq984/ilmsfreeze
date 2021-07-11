@@ -221,8 +221,14 @@ export class FreezeCourseAnnouncement extends FreezeCourseBase {
     return html`
       <h1 class="title">${this.announcementMeta!.title}</h1>
       <strong>${this.news.poster}</strong>
-      <small>${materialIcon("visibility")} ${this.news.views}</small>
-      <small>${materialIcon("calendar_today")} ${this.news.createTime}</small>
+      <small>
+        ${materialIcon("visibility")}
+        <span>${this.news.views}</span>
+      </small>
+      <small>
+        ${materialIcon("calendar_today")}
+        <span>${this.news.createTime}</span>
+      </small>
       <div class="content">
         <br />
         ${unsafeHTML(this.news.note)}

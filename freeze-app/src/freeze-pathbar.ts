@@ -1,14 +1,16 @@
-import { html, LitElement } from "lit";
+import { html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
+import { materialIcon } from "./html";
+
 export interface Fragment {
-  text: string;
+  text: string | TemplateResult;
   href: string;
   active?: boolean;
 }
 
 export const homeFragment = {
-  text: "homeTODO",
+  text: materialIcon("home", { "font-size": "1.25em" }),
   href: "/",
 };
 
