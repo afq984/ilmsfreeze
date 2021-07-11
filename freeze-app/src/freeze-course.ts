@@ -202,8 +202,8 @@ export class FzeezeCourseHomeworks extends FreezeCourseTable<HomeworkMeta> {
   typename = "homework";
   fields() {
     return {
-      id: textField,
-      title: textField,
+      id: this.makeLinkFn("freeze-homework"),
+      title: this.makeLinkFn("freeze-homework"),
     };
   }
 }
@@ -343,6 +343,23 @@ export class FreezeDiscussion extends FreezeCourseBase {
         </div>
       `
     )}`;
+  }
+}
+
+@customElement("freeze-homework")
+export class FreezeHomework extends FreezeCourseBody {
+  homeworkMeta?: HomeworkMeta;
+  homeworkChildren?: ChildrenMap;
+
+  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+    super.prepareState(location, source);
+    this.homeworkMeta = await getParamMeta(location.params, source, "homework");
+    this.homeworkChildren = parseChildren(this.homeworkMeta!.children);
+    this.body = await source.getText(
+      "homework",
+      this.homeworkMeta!.id,
+      "index.html"
+    );
   }
 }
 
