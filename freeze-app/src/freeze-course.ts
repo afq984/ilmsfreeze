@@ -1,5 +1,5 @@
 import { IndexedParams, RouterLocation } from "@vaadin/router";
-import { html, LitElement } from "lit";
+import { html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
@@ -8,7 +8,16 @@ import { FileSystemDataSource } from "./data-source.js";
 import { Fragment, homeFragment } from "./freeze-pathbar.js";
 import "./freeze-sidemenu";
 import { TableFields, textField } from "./freeze-table.js";
-import { materialIcon } from "./html.js";
+import { materialIcon, unsafeContent } from "./html.js";
+import {
+  menuItemAnnouncement,
+  menuItemDiscussion,
+  menuItemGrouplist,
+  menuItemHomework,
+  menuItemMaterial,
+  menuItemScore,
+  RouteEntry,
+} from "./routes.js";
 import {
   AnnouncementMeta,
   AttachmentMeta,
@@ -18,6 +27,7 @@ import {
   HomeworkMeta,
   MaterialMeta,
   parseChildren,
+  SubmissionMeta,
 } from "./types.js";
 
 const getParamId = (params: IndexedParams, field: string) => {
@@ -34,34 +44,24 @@ const getParamMeta = async (
   return await source.getMeta(typename, id);
 };
 
-class FreezeCourseBase extends BaseView {
+abstract class FreezeCourseBase extends BaseView {
   @state()
   courseMeta?: CourseMeta;
   @state()
   courseChildren?: ChildrenMap;
-  @state()
-  fragments: Array<Fragment>;
+  abstract get fragments(): Array<Fragment>;
 
   constructor() {
     super();
-    this.fragments = [];
   }
 
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
     const course_id = parseInt(location.params.course_id.toString());
     this.courseMeta = await source.getMeta("course", course_id);
     this.courseChildren = parseChildren(this.courseMeta!.children);
-    this.fragments = [
-      homeFragment,
-      {
-        text: this.courseMeta!.name,
-        href: `/course/${course_id}`,
-        active: true,
-      },
-    ];
   }
 
-  renderBody() {}
+  abstract renderBody(): string | TemplateResult;
 
   render() {
     if (this.courseMeta === undefined) {
@@ -83,17 +83,22 @@ class FreezeCourseBase extends BaseView {
   }
 }
 
-abstract class FreezeCourseBody extends FreezeCourseBase {
+@customElement("freeze-course")
+export class FreezeCourseOverview extends FreezeCourseBase {
   @state()
   body = "";
 
-  renderBody() {
-    return html`<div class="content">${unsafeHTML(this.body)}</div>`;
+  get fragments() {
+    return [
+      homeFragment,
+      {
+        text: this.courseMeta!.name,
+        href: `/course/${this.courseMeta!.id}`,
+        active: true,
+      },
+    ];
   }
-}
 
-@customElement("freeze-course")
-export class FreezeCourseOverview extends FreezeCourseBody {
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
     await super.prepareState(location, source);
     this.body = await source.getText(
@@ -102,10 +107,46 @@ export class FreezeCourseOverview extends FreezeCourseBody {
       "index.html"
     );
   }
+
+  renderBody() {
+    return unsafeContent(this.body);
+  }
+}
+
+abstract class FreezeCourseL2Base extends FreezeCourseBase {
+  abstract menuItem: RouteEntry;
+
+  get typename() {
+    return this.menuItem.typename!;
+  }
+
+  get fragments(): Fragment[] {
+    const course_id_param = { course_id: this.courseMeta!.id.toString() };
+    return [
+      homeFragment,
+      {
+        text: this.courseMeta!.name,
+        href: this.router!.urlForName("freeze-course", course_id_param),
+      },
+      {
+        text: this.menuItem.displayname,
+        href: this.router!.urlForName(
+          this.menuItem.component!,
+          course_id_param
+        ),
+        active: true,
+      },
+    ];
+  }
 }
 
 @customElement("freeze-course-score")
-export class FreezeCourseScore extends FreezeCourseBody {
+export class FreezeCourseScore extends FreezeCourseL2Base {
+  menuItem = menuItemScore;
+
+  @state()
+  body = "";
+
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
     await super.prepareState(location, source);
     this.body = await source.getText(
@@ -114,10 +155,19 @@ export class FreezeCourseScore extends FreezeCourseBody {
       "index.html"
     );
   }
+
+  renderBody() {
+    return unsafeContent(this.body);
+  }
 }
 
 @customElement("freeze-course-grouplist")
-export class FreezeCourseGrouplist extends FreezeCourseBody {
+export class FreezeCourseGrouplist extends FreezeCourseL2Base {
+  menuItem = menuItemGrouplist;
+
+  @state()
+  body = "";
+
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
     await super.prepareState(location, source);
     this.body = await source.getText(
@@ -126,12 +176,15 @@ export class FreezeCourseGrouplist extends FreezeCourseBody {
       "index.html"
     );
   }
+
+  renderBody() {
+    return unsafeContent(this.body);
+  }
 }
 
-abstract class FreezeCourseTable<T> extends FreezeCourseBase {
+abstract class FreezeCourseTable<T> extends FreezeCourseL2Base {
   @state()
   table: Array<T> = [];
-  abstract typename: string;
   abstract fields(): TableFields;
 
   makeLinkFn(component: string) {
@@ -165,7 +218,7 @@ abstract class FreezeCourseTable<T> extends FreezeCourseBase {
 
 @customElement("freeze-course-announcements")
 export class FreezeCourseAnnouncements extends FreezeCourseTable<AnnouncementMeta> {
-  typename = "announcement";
+  menuItem = menuItemAnnouncement;
   fields() {
     return {
       id: this.makeLinkFn("freeze-announcement"),
@@ -176,7 +229,7 @@ export class FreezeCourseAnnouncements extends FreezeCourseTable<AnnouncementMet
 
 @customElement("freeze-course-materials")
 export class FreezeCousreMaterials extends FreezeCourseTable<MaterialMeta> {
-  typename = "material";
+  menuItem = menuItemMaterial;
   fields() {
     return {
       id: this.makeLinkFn("freeze-material"),
@@ -188,7 +241,7 @@ export class FreezeCousreMaterials extends FreezeCourseTable<MaterialMeta> {
 
 @customElement("freeze-course-discussions")
 export class FreezeCourseDiscussions extends FreezeCourseTable<DiscussionMeta> {
-  typename = "discussion";
+  menuItem = menuItemDiscussion;
   fields() {
     return {
       id: this.makeLinkFn("freeze-discussion"),
@@ -199,7 +252,7 @@ export class FreezeCourseDiscussions extends FreezeCourseTable<DiscussionMeta> {
 
 @customElement("freeze-course-homeworks")
 export class FzeezeCourseHomeworks extends FreezeCourseTable<HomeworkMeta> {
-  typename = "homework";
+  menuItem = menuItemHomework;
   fields() {
     return {
       id: this.makeLinkFn("freeze-homework"),
@@ -209,7 +262,9 @@ export class FzeezeCourseHomeworks extends FreezeCourseTable<HomeworkMeta> {
 }
 
 @customElement("freeze-announcement")
-export class FreezeCourseAnnouncement extends FreezeCourseBase {
+export class FreezeCourseAnnouncement extends FreezeCourseL2Base {
+  menuItem = menuItemAnnouncement;
+
   announcementMeta?: AnnouncementMeta;
   news: any;
   attachments?: Array<AttachmentMeta>;
@@ -270,7 +325,9 @@ export class FreezeCourseAnnouncement extends FreezeCourseBase {
 }
 
 @customElement("freeze-material")
-export class FreezeMaterial extends FreezeCourseBase {
+export class FreezeMaterial extends FreezeCourseL2Base {
+  menuItem = menuItemMaterial;
+
   materialMeta?: MaterialMeta;
   materialChildren?: ChildrenMap;
   materialBody?: string;
@@ -304,7 +361,9 @@ export class FreezeMaterial extends FreezeCourseBase {
 }
 
 @customElement("freeze-discussion")
-export class FreezeDiscussion extends FreezeCourseBase {
+export class FreezeDiscussion extends FreezeCourseL2Base {
+  menuItem = menuItemDiscussion;
+
   discussionMeta?: DiscussionMeta;
   discussionJson?: any;
 
@@ -347,19 +406,95 @@ export class FreezeDiscussion extends FreezeCourseBase {
 }
 
 @customElement("freeze-homework")
-export class FreezeHomework extends FreezeCourseBody {
+export class FreezeHomework extends FreezeCourseL2Base {
+  menuItem = menuItemHomework;
+
+  @state()
   homeworkMeta?: HomeworkMeta;
+  @state()
   homeworkChildren?: ChildrenMap;
+  @state()
+  body = "";
+
+  get fragments() {
+    const frag = super.fragments;
+    const hw_params = {
+      course_id: this.courseMeta!.id.toString(),
+      homework_id: this.homeworkMeta!.id.toString(),
+    };
+    frag[frag.length - 1].active = false;
+    frag.push({
+      text: this.homeworkMeta!.title,
+      href: this.router!.urlForName("freeze-homework", hw_params),
+      active: true,
+    });
+    frag.push({
+      text: `可下載 (${this.homeworkChildren!.submittedhomework?.length || 0})`,
+      href: this.router!.urlForName("freeze-homework-submissions", hw_params),
+    });
+    return frag;
+  }
 
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
     super.prepareState(location, source);
     this.homeworkMeta = await getParamMeta(location.params, source, "homework");
-    this.homeworkChildren = parseChildren(this.homeworkMeta!.children);
     this.body = await source.getText(
       "homework",
       this.homeworkMeta!.id,
       "index.html"
     );
+    this.homeworkChildren = parseChildren(this.homeworkMeta!.children);
+  }
+
+  renderBody() {
+    return unsafeContent(this.body);
+  }
+}
+
+@customElement("freeze-homework-submissions")
+export class FreezeHomeworkSubmissions extends FreezeHomework {
+  @state()
+  submissions?: SubmissionMeta[];
+
+  get fragments() {
+    const frag = super.fragments;
+    frag[frag.length - 2].active = false;
+    frag[frag.length - 1].active = true;
+    return frag;
+  }
+
+  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+    await super.prepareState(location, source);
+    this.submissions = await source.getMetas(
+      "submittedhomework",
+      this.homeworkChildren!.submittedhomework
+    );
+  }
+
+  fields() {
+    return {
+      id: textField,
+      title: textField,
+      by: textField,
+      comment: (_: any, attr: string) => attr || "-",
+    };
+  }
+
+  renderBody() {
+    if (this.submissions === undefined || this.submissions.length === 0) {
+      return html`
+        <div style="display: inline-block">
+          <div class="oops">¯\\_(ツ)_/¯</div>
+          <div class="has-text-centered">no submissions found</div>
+        </div>
+      `;
+    }
+    return html`<freeze-table
+      .items=${this.submissions}
+      .fields=${this.fields()}
+      .sortDescending=${true}
+      .sortField=${"id"}
+    ></freeze-table>`;
   }
 }
 

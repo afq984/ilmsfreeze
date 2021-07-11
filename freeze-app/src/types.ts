@@ -49,6 +49,15 @@ export interface HomeworkMeta {
   children: Array<string>;
 }
 
+export interface SubmissionMeta {
+  id: number;
+  title: string;
+  by: string;
+  course: string;
+  comment: null | string;
+  children: Array<string>;
+}
+
 export interface AttachmentMeta {
   id: number;
   title: string;
