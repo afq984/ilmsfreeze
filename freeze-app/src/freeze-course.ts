@@ -11,6 +11,7 @@ import { TableFields, textField } from "./freeze-table.js";
 import { materialIcon } from "./html.js";
 import {
   AnnouncementMeta,
+  AttachmentMeta,
   ChildrenMap,
   CourseMeta,
   DiscussionMeta,
@@ -197,13 +198,13 @@ export class FzeezeCourseHomeworks extends FreezeCourseTable<HomeworkMeta> {
 export class FreezeCourseAnnouncement extends FreezeCourseBase {
   announcementMeta?: AnnouncementMeta;
   news: any;
+  attachments?: Array<AttachmentMeta>;
 
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
     await super.prepareState(location, source);
     const announcement_id = parseInt(
       location.params.announcement_id.toString()
     );
-    console.log(announcement_id);
     this.announcementMeta = await source.getMeta(
       "announcement",
       announcement_id
@@ -215,6 +216,23 @@ export class FreezeCourseAnnouncement extends FreezeCourseBase {
         "index.json"
       )
     ).news;
+    const children = parseChildren(this.announcementMeta!.children);
+    this.attachments = await source.getMetas("attachment", children.attachment);
+  }
+
+  renderAttachments() {
+    if (this.attachments === undefined) {
+      return undefined;
+    }
+    return html`
+      <br />
+      ${this.attachments.map(
+        (item) => html`
+          ${materialIcon("attachment")}
+          <a href="#TODO">${item.title}</a>
+        `
+      )}
+    `;
   }
 
   renderBody() {
@@ -231,7 +249,7 @@ export class FreezeCourseAnnouncement extends FreezeCourseBase {
       </small>
       <div class="content">
         <br />
-        ${unsafeHTML(this.news.note)}
+        ${unsafeHTML(this.news.note)} ${this.renderAttachments()}
       </div>
     `;
   }
