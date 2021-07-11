@@ -472,9 +472,17 @@ export class FreezeHomeworkSubmissions extends FreezeHomework {
   }
 
   fields() {
+    const linkFn = (item: any, attr: string) => {
+      const url = this.router!.urlForName("freeze-submission", {
+        course_id: this.courseMeta!.id.toString(),
+        homework_id: this.homeworkMeta!.id.toString(),
+        submittedhomework_id: item.id.toString(),
+      });
+      return html`<a href=${url}>${attr}</a>`;
+    };
     return {
-      id: textField,
-      title: textField,
+      id: linkFn,
+      title: linkFn,
       by: textField,
       comment: (_: any, attr: string) => attr || "-",
     };
@@ -495,6 +503,41 @@ export class FreezeHomeworkSubmissions extends FreezeHomework {
       .sortDescending=${true}
       .sortField=${"id"}
     ></freeze-table>`;
+  }
+}
+
+@customElement("freeze-submission")
+export class FreezeSubmission extends FreezeHomeworkSubmissions {
+  submissionMeta?: SubmissionMeta;
+  submissionBody = "";
+
+  get fragments() {
+    const frag = super.fragments;
+    frag[frag.length - 1].active = false;
+    frag.push({
+      text: this.submissionMeta!.by,
+      href: "#TODO",
+      active: true,
+    });
+    return frag;
+  }
+
+  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+    await super.prepareState(location, source);
+    this.submissionMeta = await getParamMeta(
+      location.params,
+      source,
+      "submittedhomework"
+    );
+    this.submissionBody = await source.getText(
+      "submittedhomework",
+      this.submissionMeta!.id,
+      "index.html"
+    );
+  }
+
+  renderBody() {
+    return unsafeContent(this.submissionBody);
   }
 }
 
