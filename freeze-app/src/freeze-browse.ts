@@ -1,5 +1,6 @@
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { RouterLocation } from "@vaadin/router";
 
 import { BaseView } from "./base-view.js";
 import { FileSystemDataSource } from "./data-source.js";
@@ -39,8 +40,12 @@ export class FreezeBrowse extends BaseView {
     `;
   }
 
+  async prepareState(_location: RouterLocation, source: FileSystemDataSource) {
+    this.courses = await source.getAllMeta("course");
+  }
+
   async handleDirectoryChange(rootHandle: FileSystemDirectoryHandle) {
     const source = new FileSystemDataSource(rootHandle);
-    this.courses = await source.getAllMeta("course");
+    await this.prepareState(this.location!, source);
   }
 }
