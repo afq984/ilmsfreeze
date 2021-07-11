@@ -8,6 +8,50 @@ export interface MenuItem {
 
 export type RouteEntry = MenuItem & Route;
 
+export const menuItemAnnouncement = {
+  typename: "announcement",
+  displayname: "公告",
+  countable: true,
+  path: "/course/:course_id/announcement",
+  component: "freeze-course-announcements",
+};
+
+export const menuItemMaterial = {
+  typename: "material",
+  displayname: "上課教材",
+  countable: true,
+  path: "/course/:course_id/material",
+  component: "freeze-course-materials",
+};
+export const menuItemDiscussion = {
+  typename: "discussion",
+  displayname: "討論區",
+  countable: true,
+  path: "/course/:course_id/discussion",
+  component: "freeze-course-discussions",
+};
+export const menuItemHomework = {
+  typename: "homework",
+  displayname: "作業",
+  countable: true,
+  path: "/course/:course_id/homework",
+  component: "freeze-course-homeworks",
+};
+export const menuItemScore = {
+  typename: "score",
+  displayname: "成績計算",
+  countable: false,
+  path: "/course/:course_id/score",
+  component: "freeze-course-score",
+};
+export const menuItemGrouplist = {
+  typename: "grouplist",
+  displayname: "小組專區",
+  countable: false,
+  path: "/course/:course_id/grouplist",
+  component: "freeze-course-grouplist",
+};
+
 export const menuItems: Array<RouteEntry> = [
   {
     displayname: "課程說明",
@@ -15,48 +59,12 @@ export const menuItems: Array<RouteEntry> = [
     path: "/course/:course_id",
     component: "freeze-course",
   },
-  {
-    typename: "announcement",
-    displayname: "公告",
-    countable: true,
-    path: "/course/:course_id/announcement",
-    component: "freeze-course-announcements",
-  },
-  {
-    typename: "material",
-    displayname: "上課教材",
-    countable: true,
-    path: "/course/:course_id/material",
-    component: "freeze-course-materials",
-  },
-  {
-    typename: "discussion",
-    displayname: "討論區",
-    countable: true,
-    path: "/course/:course_id/discussion",
-    component: "freeze-course-discussions",
-  },
-  {
-    typename: "homework",
-    displayname: "作業",
-    countable: true,
-    path: "/course/:course_id/homework",
-    component: "freeze-course-homeworks",
-  },
-  {
-    typename: "score",
-    displayname: "成績計算",
-    countable: false,
-    path: "/course/:course_id/score",
-    component: "freeze-course-score",
-  },
-  {
-    typename: "grouplist",
-    displayname: "小組專區",
-    countable: false,
-    path: "/course/:course_id/grouplist",
-    component: "freeze-course-grouplist",
-  },
+  menuItemAnnouncement,
+  menuItemMaterial,
+  menuItemDiscussion,
+  menuItemHomework,
+  menuItemScore,
+  menuItemGrouplist,
 ];
 
 export const routes: Array<Route> = (
@@ -84,6 +92,10 @@ export const routes: Array<Route> = (
     {
       path: "/course/:course_id/homework/:homework_id",
       component: "freeze-homework",
+    },
+    {
+      path: "/course/:course_id/homework/:homework_id/submission",
+      component: "freeze-homework-submissions",
     },
   ] as Array<Route>
 ).concat(menuItems as Array<Route>);
