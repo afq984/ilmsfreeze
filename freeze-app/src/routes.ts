@@ -97,5 +97,9 @@ export const routes: Array<Route> = (
       path: "/course/:course_id/homework/:homework_id/submission",
       component: "freeze-homework-submissions",
     },
+    {
+      path: "/course/:course_id/homework/:homework_id/submission/:submittedhomework_id",
+      component: "freeze-submission",
+    },
   ] as Array<Route>
 ).concat(menuItems as Array<Route>);
