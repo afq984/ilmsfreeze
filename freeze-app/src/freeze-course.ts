@@ -191,8 +191,8 @@ export class FreezeCourseDiscussions extends FreezeCourseTable<DiscussionMeta> {
   typename = "discussion";
   fields() {
     return {
-      id: textField,
-      title: textField,
+      id: this.makeLinkFn("freeze-discussion"),
+      title: this.makeLinkFn("freeze-discussion"),
     };
   }
 }
@@ -300,6 +300,49 @@ export class FreezeMaterial extends FreezeCourseBase {
       ${this.renderVideo()}
       <div class="contenet">${unsafeHTML(this.materialBody!)}</div>
     `;
+  }
+}
+
+@customElement("freeze-discussion")
+export class FreezeDiscussion extends FreezeCourseBase {
+  discussionMeta?: DiscussionMeta;
+  discussionJson?: any;
+
+  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+    super.prepareState(location, source);
+    this.discussionMeta = await getParamMeta(
+      location.params,
+      source,
+      "discussion"
+    );
+    this.discussionJson = await source.getJson(
+      "discussion",
+      this.discussionMeta!.id,
+      "index.json"
+    );
+  }
+
+  renderBody() {
+    return html`${this.discussionJson.posts.items.map(
+      (post: any) => html`
+        <div class="box">
+          <div class="content">
+            <strong>${post.name}</strong>
+            <small>${materialIcon("email")} ${post.email}</small>
+            <small>${materialIcon("calendar_today")} ${post.date}</small>
+            <br />
+            ${unsafeHTML(post.note)}
+            ${post.attach.map(
+              (attachment: any, index: number) => html`
+                ${index === 0 ? html`<br />` : undefined}
+                ${materialIcon("attachment")}
+                <a href="#TODO">${attachment.srcName}</a>
+              `
+            )}
+          </div>
+        </div>
+      `
+    )}`;
   }
 }
 
