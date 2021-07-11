@@ -1,6 +1,6 @@
-import { RouterLocation } from "@vaadin/router";
-import { html } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { IndexedParams, RouterLocation } from "@vaadin/router";
+import { html, LitElement } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import { BaseView } from "./base-view.js";
@@ -19,6 +19,20 @@ import {
   MaterialMeta,
   parseChildren,
 } from "./types.js";
+
+const getParamId = (params: IndexedParams, field: string) => {
+  const str = params[field].toString();
+  return parseInt(str);
+};
+
+const getParamMeta = async (
+  params: IndexedParams,
+  source: FileSystemDataSource,
+  typename: string
+) => {
+  const id = getParamId(params, `${typename}_id`);
+  return await source.getMeta(typename, id);
+};
 
 class FreezeCourseBase extends BaseView {
   @state()
@@ -150,7 +164,7 @@ abstract class FreezeCourseTable<T> extends FreezeCourseBase {
 }
 
 @customElement("freeze-course-announcements")
-export class FreezeCouseAnnouncements extends FreezeCourseTable<AnnouncementMeta> {
+export class FreezeCourseAnnouncements extends FreezeCourseTable<AnnouncementMeta> {
   typename = "announcement";
   fields() {
     return {
@@ -161,19 +175,19 @@ export class FreezeCouseAnnouncements extends FreezeCourseTable<AnnouncementMeta
 }
 
 @customElement("freeze-course-materials")
-export class FreezeCouseMaterials extends FreezeCourseTable<MaterialMeta> {
+export class FreezeCousreMaterials extends FreezeCourseTable<MaterialMeta> {
   typename = "material";
   fields() {
     return {
-      id: textField,
-      title: textField,
+      id: this.makeLinkFn("freeze-material"),
+      title: this.makeLinkFn("freeze-material"),
       type: textField,
     };
   }
 }
 
 @customElement("freeze-course-discussions")
-export class FreezeCouseDiscussions extends FreezeCourseTable<DiscussionMeta> {
+export class FreezeCourseDiscussions extends FreezeCourseTable<DiscussionMeta> {
   typename = "discussion";
   fields() {
     return {
@@ -252,5 +266,49 @@ export class FreezeCourseAnnouncement extends FreezeCourseBase {
         ${unsafeHTML(this.news.note)} ${this.renderAttachments()}
       </div>
     `;
+  }
+}
+
+@customElement("freeze-material")
+export class FreezeMaterial extends FreezeCourseBase {
+  materialMeta?: MaterialMeta;
+  materialChildren?: ChildrenMap;
+  materialBody?: string;
+
+  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+    super.prepareState(location, source);
+    this.materialMeta = await getParamMeta(location.params, source, "material");
+    this.materialChildren = parseChildren(this.materialMeta!.children);
+    this.materialBody = await source.getText(
+      "material",
+      this.materialMeta!.id,
+      "index.html"
+    );
+  }
+
+  renderVideo() {
+    if (this.materialChildren!.video === undefined) {
+      return undefined;
+    }
+    return html`<freeze-video
+      video_id=${this.materialChildren!.video[0]}
+    ></freeze-video>`;
+  }
+
+  renderBody() {
+    return html`
+      ${this.renderVideo()}
+      <div class="contenet">${unsafeHTML(this.materialBody!)}</div>
+    `;
+  }
+}
+
+@customElement("freeze-video")
+export class FreezeVideo extends LitElement {
+  @property({ type: Number })
+  video_id?: number;
+
+  render() {
+    return html`<div>Video ${this.video_id} TODO</div>`;
   }
 }
