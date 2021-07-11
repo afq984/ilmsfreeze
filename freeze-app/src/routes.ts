@@ -81,5 +81,9 @@ export const routes: Array<Route> = (
       path: "/course/:course_id/discussion/:discussion_id",
       component: "freeze-discussion",
     },
+    {
+      path: "/course/:course_id/homework/:homework_id",
+      component: "freeze-homework",
+    },
   ] as Array<Route>
 ).concat(menuItems as Array<Route>);
