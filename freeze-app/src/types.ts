@@ -48,3 +48,11 @@ export interface HomeworkMeta {
   course: string;
   children: Array<string>;
 }
+
+export interface AttachmentMeta {
+  id: number;
+  title: string;
+  parent: string;
+  saved_filename?: string;
+  children: Array<string>;
+}
