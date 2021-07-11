@@ -19,8 +19,12 @@ export class FileSystemDataSource {
     return await file.text();
   }
 
+  async getJson(typename: string, id: number, filename: string) {
+    return JSON.parse(await this.getText(typename, id, filename));
+  }
+
   async getMeta(typename: string, id: number) {
-    return JSON.parse(await this.getText(typename, id, "meta.json"));
+    return await this.getJson(typename, id, "meta.json");
   }
 
   async getMetas(typename: string, ids: Array<number> | undefined) {

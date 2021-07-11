@@ -69,5 +69,9 @@ export const routes: Array<Route> = (
       path: "/download",
       component: "freeze-download",
     },
+    {
+      path: "/course/:course_id/announcement/:announcement_id",
+      component: "freeze-announcement",
+    },
   ] as Array<Route>
 ).concat(menuItems as Array<Route>);
