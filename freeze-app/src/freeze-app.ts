@@ -70,6 +70,18 @@ export class FreezeApp extends LitElement {
     };
     this.router!.dataSource = new FileSystemDataSource(rootHandle);
     this.dispatchEvent(new CustomEvent("directory-changed", options));
+
+    if (
+      !("serviceWorker" in navigator) ||
+      navigator.serviceWorker.controller === null
+    ) {
+      console.log("Service worker not available, not sending data source");
+    } else {
+      navigator.serviceWorker.controller.postMessage({
+        op: "set_root_handle",
+        data: rootHandle,
+      });
+    }
   }
 
   private async _onSubscribe(e: CustomEvent) {
