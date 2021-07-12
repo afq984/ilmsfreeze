@@ -1,6 +1,7 @@
 import { RouterLocation } from "@vaadin/router";
 import { LitElement } from "lit";
-import { FileSystemDataSource, RouterSource } from "./data-source";
+import { FileSystemDataSource } from "./data-source";
+import { RouterSource } from "./routes";
 
 export abstract class BaseView extends LitElement {
   subscribedTo?: Element;

@@ -7,8 +7,8 @@ import "./freeze-browse";
 import "./freeze-download";
 import "./freeze-course";
 import "./freeze-index";
-import { routes } from "./routes";
-import { FileSystemDataSource, RouterSource } from "./data-source";
+import { RouterSource, routes } from "./routes";
+import { FileSystemDataSource } from "./data-source";
 
 @customElement("freeze-app")
 export class FreezeApp extends LitElement {

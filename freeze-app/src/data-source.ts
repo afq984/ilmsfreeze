@@ -1,5 +1,3 @@
-import { Router } from "@vaadin/router";
-
 export class FileSystemDataSource {
   rootHandle: FileSystemDirectoryHandle;
 
@@ -52,8 +50,4 @@ export class FileSystemDataSource {
     }
     return result;
   }
-}
-
-export class RouterSource extends Router {
-  dataSource?: FileSystemDataSource;
 }

@@ -1,4 +1,5 @@
-import { Route } from "@vaadin/router";
+import { Route, Router } from "@vaadin/router";
+import { FileSystemDataSource } from "./data-source";
 
 export interface MenuItem {
   typename?: string;
@@ -107,3 +108,7 @@ export const routes: Array<Route> = (
     },
   ] as Array<Route>
 ).concat(menuItems as Array<Route>);
+
+export class RouterSource extends Router {
+  dataSource?: FileSystemDataSource;
+}
