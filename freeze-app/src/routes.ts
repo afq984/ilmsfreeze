@@ -13,7 +13,7 @@ export const menuItemAnnouncement = {
   typename: "announcement",
   displayname: "公告",
   countable: true,
-  path: "/course/:course_id/announcement",
+  path: "/course/:course_id/announcement/",
   component: "freeze-course-announcements",
 };
 
@@ -21,35 +21,35 @@ export const menuItemMaterial = {
   typename: "material",
   displayname: "上課教材",
   countable: true,
-  path: "/course/:course_id/material",
+  path: "/course/:course_id/material/",
   component: "freeze-course-materials",
 };
 export const menuItemDiscussion = {
   typename: "discussion",
   displayname: "討論區",
   countable: true,
-  path: "/course/:course_id/discussion",
+  path: "/course/:course_id/discussion/",
   component: "freeze-course-discussions",
 };
 export const menuItemHomework = {
   typename: "homework",
   displayname: "作業",
   countable: true,
-  path: "/course/:course_id/homework",
+  path: "/course/:course_id/homework/",
   component: "freeze-course-homeworks",
 };
 export const menuItemScore = {
   typename: "score",
   displayname: "成績計算",
   countable: false,
-  path: "/course/:course_id/score",
+  path: "/course/:course_id/score/",
   component: "freeze-course-score",
 };
 export const menuItemGrouplist = {
   typename: "grouplist",
   displayname: "小組專區",
   countable: false,
-  path: "/course/:course_id/grouplist",
+  path: "/course/:course_id/grouplist/",
   component: "freeze-course-grouplist",
 };
 
@@ -80,11 +80,11 @@ export const routes: Array<Route> = (
       component: "freeze-index",
     },
     {
-      path: "/course",
+      path: "/course/",
       component: "freeze-browse",
     },
     {
-      path: "/download",
+      path: "/download/",
       component: "freeze-download",
     },
     {
@@ -104,7 +104,7 @@ export const routes: Array<Route> = (
       component: "freeze-homework",
     },
     {
-      path: "/course/:course_id/homework/:homework_id/submission",
+      path: "/course/:course_id/homework/:homework_id/submission/",
       component: "freeze-homework-submissions",
     },
     {
