@@ -76,7 +76,7 @@ export class FreezeIndex extends LitElement {
               : this.renderStatus(statusFail, "Unsupported")}
           </dt>
           <dd>
-            <em>Required</em> to load/save backup iLMS data from/to your
+            <em>Required</em> to load/download iLMS data from/to your
             disk.<br />
             See
             ${externalLink(
