@@ -3,8 +3,7 @@ import { customElement, property } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 
 import { ChildrenMap, CourseMeta } from "./types";
-import { RouterSource } from "./data-source";
-import { menuItems, RouteEntry } from "./routes";
+import { menuItems, RouteEntry, RouterSource } from "./routes";
 
 const getLink = (
   router: RouterSource,
