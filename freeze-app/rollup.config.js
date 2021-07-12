@@ -33,7 +33,7 @@ export default {
     summary(),
     // Optional: copy any static assets to build directory
     copy({
-      patterns: ["sys/**/*"],
+      patterns: ["sys/**/*", "sw-status.json"],
     }),
   ],
   output: {
