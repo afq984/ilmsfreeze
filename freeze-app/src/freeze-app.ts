@@ -22,11 +22,30 @@ export class FreezeApp extends LitElement {
 
   firstUpdated() {
     this.initRouter(this.mainRef.value!);
+    this.initServiceWorker();
   }
 
   initRouter(element: Element) {
     this.router = new RouterSource(element);
     this.router.setRoutes(routes);
+  }
+
+  initServiceWorker() {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").then(
+        function (registration) {
+          // Registration was successful
+          console.log(
+            "ServiceWorker registration successful with scope: ",
+            registration.scope
+          );
+        },
+        function (err) {
+          // registration failed :(
+          console.log("ServiceWorker registration failed: ", err);
+        }
+      );
+    }
   }
 
   render() {

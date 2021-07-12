@@ -2,13 +2,11 @@
   "compilerOptions": {
     "target": "es2019",
     "module": "es2020",
-    "lib": ["es2020", "DOM", "DOM.Iterable"],
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "inlineSources": true,
-    "outDir": "out/tsc",
-    "rootDir": "./src",
+    "outDir": "./out/tsc",
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -19,14 +17,6 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true,
-    "plugins": [
-      {
-        "name": "ts-lit-plugin",
-        "strict": true
-      }
-    ]
-  },
-  "include": ["src/*.ts"],
-  "exclude": []
+    "forceConsistentCasingInFileNames": true
+  }
 }
