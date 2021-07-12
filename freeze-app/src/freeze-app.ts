@@ -6,6 +6,7 @@ import "./freeze-navbar";
 import "./freeze-browse";
 import "./freeze-download";
 import "./freeze-course";
+import "./freeze-index";
 import { routes } from "./routes";
 import { FileSystemDataSource, RouterSource } from "./data-source";
 
