@@ -51,3 +51,14 @@ export class FileSystemDataSource {
     return result;
   }
 }
+
+export const getSavedFilename = (meta: any) => {
+  // https://github.com/afq984/ilmsdump/blob/main/ilmsserve/__init__.py#L342
+  if (meta.saved_filename !== undefined) {
+    return meta.saved_filename;
+  }
+  if (meta.title === "meta.json") {
+    return "meta_.json";
+  }
+  return meta.title;
+};

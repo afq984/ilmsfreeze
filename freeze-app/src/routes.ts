@@ -1,4 +1,4 @@
-import { Route, Router } from "@vaadin/router";
+import { Commands, Context, Route, Router } from "@vaadin/router";
 import { FileSystemDataSource } from "./data-source";
 
 export interface MenuItem {
@@ -68,6 +68,11 @@ export const menuItems: Array<RouteEntry> = [
   menuItemGrouplist,
 ];
 
+const actionOpenBlank = (ctx: Context, commands: Commands) => {
+  window.open(ctx.pathname + ctx.search);
+  return commands.prevent();
+};
+
 export const routes: Array<Route> = (
   [
     {
@@ -105,6 +110,14 @@ export const routes: Array<Route> = (
     {
       path: "/course/:course_id/homework/:homework_id/submission/:submittedhomework_id",
       component: "freeze-submission",
+    },
+    {
+      path: "/attachment/(.*)",
+      action: actionOpenBlank,
+    },
+    {
+      path: "/sys/read_attach.php(.*)",
+      action: actionOpenBlank,
     },
   ] as Array<Route>
 ).concat(menuItems as Array<Route>);

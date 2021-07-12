@@ -2,6 +2,8 @@
   "dependencies": {
     "@vaadin/router": "^1.7.4",
     "lit": "^2.0.0-rc.2",
+    "workbox-core": "^6.1.5",
+    "workbox-range-requests": "^6.1.5",
     "workbox-routing": "^6.1.5"
   },
   "scripts": {
