@@ -11,7 +11,7 @@ export interface Fragment {
 
 export const homeFragment = {
   text: materialIcon("home", { "font-size": "1.25em" }),
-  href: "/",
+  href: "/course",
 };
 
 @customElement("freeze-pathbar")

@@ -71,6 +71,10 @@ export const routes: Array<Route> = (
   [
     {
       path: "/",
+      component: "freeze-index",
+    },
+    {
+      path: "/course",
       component: "freeze-browse",
     },
     {
