@@ -109,3 +109,8 @@ const handleVideo: RouteHandlerCallback = async ({ params, request }) => {
   );
 };
 registerRoute(makeRegexPathMatcher("^/video/(\\d+)$"), handleVideo);
+
+const handleCourse: RouteHandlerCallback = () => {
+  return fetch("/");
+};
+registerRoute(makeRegexPathMatcher("^/course/"), handleCourse);
