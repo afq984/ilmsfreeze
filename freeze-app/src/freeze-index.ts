@@ -103,7 +103,7 @@ export class FreezeIndex extends LitElement {
           <dd>
             You need the Chrome Extension to <em>download</em> from the
             browser.<br />
-            You can also load the <code>ilmsdump.out</code> directory produced
+            Alternatively, you can load the <code>ilmsdump.out</code> directory produced
             by
             ${externalLink("ilmsdump", "https://github.com/afq984/ilmsdump")}.
           </dd>
