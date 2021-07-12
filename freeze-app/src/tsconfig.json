@@ -1,0 +1,13 @@
+{
+  "extends": "../generic-tsconfig.json",
+  "compilerOptions": {
+    "lib": ["es2020", "DOM", "DOM.Iterable"],
+    "rootDir": ".",
+    "plugins": [
+      {
+        "name": "ts-lit-plugin",
+        "strict": true
+      }
+    ]
+  }
+}
