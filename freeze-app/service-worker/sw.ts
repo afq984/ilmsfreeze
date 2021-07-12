@@ -92,3 +92,20 @@ const redirectAttachment = async (ctx: RouteHandlerCallbackOptions) => {
   return Response.redirect(`/attachment/${id}`);
 };
 registerRoute(makePathMatcher("/sys/read_attach.php"), redirectAttachment);
+
+const handleVideo: RouteHandlerCallback = async ({ params, request }) => {
+  if (dataSource === null) {
+    return new Response("no data source available", { status: 404 });
+  }
+  const id = parseInt((params as string[])[1]);
+  const file = await dataSource.get("video", id, "video.mp4");
+  return maybeCreatePartialResponse(
+    request,
+    new Response(file, {
+      headers: {
+        "Content-Type": "video/mp4",
+      },
+    })
+  );
+};
+registerRoute(makeRegexPathMatcher("^/video/(\\d+)$"), handleVideo);

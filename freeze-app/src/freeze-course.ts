@@ -1,6 +1,6 @@
 import { IndexedParams, RouterLocation } from "@vaadin/router";
-import { html, LitElement, TemplateResult } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { html, TemplateResult } from "lit";
+import { customElement, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import { BaseView } from "./base-view.js";
@@ -344,12 +344,11 @@ export class FreezeMaterial extends FreezeCourseL2Base {
   }
 
   renderVideo() {
-    if (this.materialChildren!.video === undefined) {
+    const videoes = this.materialChildren!.video;
+    if (videoes === undefined) {
       return undefined;
     }
-    return html`<freeze-video
-      video_id=${this.materialChildren!.video[0]}
-    ></freeze-video>`;
+    return html`<video src="/video/${videoes[0]}" controls></video>`;
   }
 
   renderBody() {
@@ -538,15 +537,5 @@ export class FreezeSubmission extends FreezeHomeworkSubmissions {
 
   renderBody() {
     return unsafeContent(this.submissionBody);
-  }
-}
-
-@customElement("freeze-video")
-export class FreezeVideo extends LitElement {
-  @property({ type: Number })
-  video_id?: number;
-
-  render() {
-    return html`<div>Video ${this.video_id} TODO</div>`;
   }
 }
