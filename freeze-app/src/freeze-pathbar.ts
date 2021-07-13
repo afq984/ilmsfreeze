@@ -11,7 +11,13 @@ export interface Fragment {
 
 export const homeFragment = {
   text: materialIcon("home", { "font-size": "1.25em" }),
-  href: "/course",
+  href: "/course/",
+};
+
+export const fragmentsPush = (frags: Fragment[], f: Fragment) => {
+  frags[frags.length - 1].active = false;
+  frags.push(f);
+  return frags;
 };
 
 @customElement("freeze-pathbar")
@@ -39,9 +45,7 @@ export class FreezePathbar extends LitElement {
           ${this.fragments.map(
             (fragment) => html`
               <li class="${fragment.active ? "is-active" : ""}">
-                <a href="${fragment.active ? "#" : fragment.href}">
-                  ${fragment.text}
-                </a>
+                <a href="${fragment.href}"> ${fragment.text} </a>
               </li>
             `
           )}
