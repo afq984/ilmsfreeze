@@ -5,7 +5,7 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import { BaseView } from "./base-view.js";
 import { FileSystemDataSource } from "./data-source.js";
-import { Fragment, homeFragment } from "./freeze-pathbar.js";
+import { Fragment, fragmentsPush, homeFragment } from "./freeze-pathbar.js";
 import "./freeze-sidemenu";
 import { TableFields, textField } from "./freeze-table.js";
 import { materialIcon, unsafeContent } from "./html.js";
@@ -98,7 +98,7 @@ export class FreezeCourseOverview extends FreezeCourseBase {
       homeFragment,
       {
         text: this.courseMeta!.name,
-        href: `/course/${this.courseMeta!.id}`,
+        href: `/course/${this.courseMeta!.id}/`,
         active: true,
       },
     ];
@@ -267,12 +267,24 @@ export class FzeezeCourseHomeworks extends FreezeCourseTable<HomeworkMeta> {
 }
 
 @customElement("freeze-announcement")
-export class FreezeCourseAnnouncement extends FreezeCourseL2Base {
+export class FreezeAnnouncement extends FreezeCourseL2Base {
   menuItem = menuItemAnnouncement;
 
   announcementMeta?: AnnouncementMeta;
   news: any;
   attachments?: Array<AttachmentMeta>;
+
+  get fragments() {
+    const meta = this.announcementMeta!;
+    return fragmentsPush(super.fragments, {
+      text: meta.title,
+      href: this.router!.urlForName("freeze-announcement", {
+        course_id: this.courseMeta!.id.toString(),
+        announcement_id: meta.id.toString(),
+      }),
+      active: true,
+    });
+  }
 
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
     await super.prepareState(location, source);
@@ -337,6 +349,18 @@ export class FreezeMaterial extends FreezeCourseL2Base {
   materialChildren?: ChildrenMap;
   materialBody?: string;
 
+  get fragments() {
+    const meta = this.materialMeta!;
+    return fragmentsPush(super.fragments, {
+      text: meta.title,
+      href: this.router!.urlForName("freeze-material", {
+        course_id: this.courseMeta!.id.toString(),
+        material_id: meta.id.toString(),
+      }),
+      active: true,
+    });
+  }
+
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
     super.prepareState(location, source);
     this.materialMeta = await getParamMeta(location.params, source, "material");
@@ -385,6 +409,18 @@ export class FreezeDiscussion extends FreezeCourseL2Base {
     );
   }
 
+  get fragments() {
+    const meta = this.discussionMeta!;
+    return fragmentsPush(super.fragments, {
+      text: meta.title,
+      href: this.router!.urlForName("freeze-discussion", {
+        course_id: this.courseMeta!.id.toString(),
+        discussion_id: meta.id.toString(),
+      }),
+      active: true,
+    });
+  }
+
   renderBody() {
     return html`${this.discussionJson.posts.items.map(
       (post: any) => html`
@@ -399,7 +435,9 @@ export class FreezeDiscussion extends FreezeCourseL2Base {
               (attachment: any, index: number) => html`
                 ${index === 0 ? html`<br />` : undefined}
                 ${materialIcon("attachment")}
-                <a href="/attachment/${attachment.id}" target="_blank">${attachment.srcName}</a>
+                <a href="/attachment/${attachment.id}" target="_blank"
+                  >${attachment.srcName}</a
+                >
               `
             )}
           </div>
@@ -516,14 +554,16 @@ export class FreezeSubmission extends FreezeHomeworkSubmissions {
   submissionBody = "";
 
   get fragments() {
-    const frag = super.fragments;
-    frag[frag.length - 1].active = false;
-    frag.push({
-      text: this.submissionMeta!.by,
-      href: "#TODO",
+    const meta = this.submissionMeta!;
+    return fragmentsPush(super.fragments, {
+      text: meta.title,
+      href: this.router!.urlForName("freeze-submission", {
+        course_id: this.courseMeta!.id.toString(),
+        homework_id: this.homeworkMeta!.id.toString(),
+        submission_id: meta.id.toString(),
+      }),
       active: true,
     });
-    return frag;
   }
 
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {

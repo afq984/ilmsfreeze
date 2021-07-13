@@ -1,8 +1,7 @@
 import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
-
 @customElement("freeze-navbar")
-export class IlNavbar extends LitElement {
+export class FreezeNavbar extends LitElement {
   createRenderRoot() {
     return this;
   }
