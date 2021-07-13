@@ -63,6 +63,11 @@ abstract class FreezeCourseBase extends BaseView {
 
   abstract renderBody(): string | TemplateResult;
 
+  async handleDirectoryChange(rootHandle: FileSystemDirectoryHandle) {
+    const source = new FileSystemDataSource(rootHandle);
+    await this.prepareState(this.location!, source);
+  }
+
   render() {
     if (this.courseMeta === undefined) {
       return html`404`;

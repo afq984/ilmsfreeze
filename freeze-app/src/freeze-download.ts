@@ -9,4 +9,6 @@ export class FreezeDownload extends BaseView {
     return html` <h2 class="title is-2">Not implemented</h2>
       <p>Download is not yet implemented.</p>`;
   }
+
+  async handleDirectoryChange() {}
 }
