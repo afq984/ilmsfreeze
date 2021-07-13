@@ -48,7 +48,9 @@ export abstract class BaseView extends LitElement {
     e.addEventListener("directory-changed", this.directoryChangedListener);
   }
 
-  abstract handleDirectoryChange(_rootHandle: FileSystemDirectoryHandle): Promise<any>;
+  abstract handleDirectoryChange(
+    _rootHandle: FileSystemDirectoryHandle
+  ): Promise<any>;
 
   connectedCallback() {
     super.connectedCallback();
