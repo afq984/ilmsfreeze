@@ -8,7 +8,7 @@ import { createPartialResponse } from "workbox-range-requests";
 import { registerRoute } from "workbox-routing";
 import { FileSystemDataSource, getSavedFilename } from "./data-source";
 
-declare var self: ServiceWorkerGlobalScope;
+declare let self: ServiceWorkerGlobalScope;
 
 clientsClaim();
 

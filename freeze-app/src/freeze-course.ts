@@ -303,7 +303,7 @@ export class FreezeCourseAnnouncement extends FreezeCourseL2Base {
       ${this.attachments.map(
         (item) => html`
           ${materialIcon("attachment")}
-          <a href="/attachment/${item.id}">${item.title}</a>
+          <a href="/attachment/${item.id}" target="_blank">${item.title}</a>
         `
       )}
     `;
@@ -399,7 +399,7 @@ export class FreezeDiscussion extends FreezeCourseL2Base {
               (attachment: any, index: number) => html`
                 ${index === 0 ? html`<br />` : undefined}
                 ${materialIcon("attachment")}
-                <a href="/attachment/${attachment.id}">${attachment.srcName}</a>
+                <a href="/attachment/${attachment.id}" target="_blank">${attachment.srcName}</a>
               `
             )}
           </div>

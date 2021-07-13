@@ -7,14 +7,8 @@ import minifyHTML from "rollup-plugin-minify-html-literals";
 import summary from "rollup-plugin-summary";
 import replace from "@rollup/plugin-replace";
 
-export default {
-  input: ["out/tsc/sw.js"],
-  plugins: [
-    // Entry point for application build; can specify a glob to build multiple
-    // HTML files for non-SPA app
-    html({
-      input: "index.html",
-    }),
+const plugins = () => {
+  return [
     replace({
       "process.env.NODE_ENV": JSON.stringify("development"),
       preventAssignment: true,
@@ -35,9 +29,28 @@ export default {
     copy({
       patterns: ["sys/**/*", "sw-status.json"],
     }),
-  ],
-  output: {
-    dir: "out/dist",
-  },
-  preserveEntrySignatures: "strict",
+  ];
 };
+
+export default [
+  {
+    plugins: [
+      // Entry point for application build; can specify a glob to build multiple
+      // HTML files for non-SPA app
+      html({
+        input: "index.html",
+      }),
+    ].concat(plugins()),
+    output: {
+      dir: "out/dist",
+    },
+    preserveEntrySignatures: "strict",
+  },
+  {
+    input: "out/tsc/sw.js",
+    plugins: plugins(),
+    output: {
+      dir: "out/dist",
+    },
+  },
+];
