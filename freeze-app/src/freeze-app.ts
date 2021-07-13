@@ -9,39 +9,73 @@ import "./freeze-course";
 import "./freeze-index";
 import { RouterSource, routes } from "./routes";
 import { FileSystemDataSource } from "./data-source";
+import { IDBPDatabase, openDB } from "idb";
 
 @customElement("freeze-app")
 export class FreezeApp extends LitElement {
   rootHandle?: FileSystemDirectoryHandle;
   mainRef: Ref<Element> = createRef();
-  router?: RouterSource;
+  router: RouterSource;
+  db?: IDBPDatabase;
+
+  constructor() {
+    super();
+    this.router = new RouterSource();
+  }
 
   createRenderRoot() {
     return this;
   }
 
-  firstUpdated() {
-    this.initRouter(this.mainRef.value!);
+  connectedCallback() {
+    super.connectedCallback();
     this.initServiceWorker();
+    this.initDB();
   }
 
-  initRouter(element: Element) {
-    this.router = new RouterSource(element);
+  firstUpdated() {
+    this.router.setOutlet(this.mainRef.value!);
     this.router.setRoutes(routes);
+  }
+
+  async initDB() {
+    this.db = await openDB("meta", 1, {
+      upgrade(db) {
+        db.createObjectStore("keyval");
+      },
+    });
+    const cachedHandle = await this.db.get("keyval", "storedHandle");
+    if (cachedHandle !== undefined) {
+      if (
+        (await cachedHandle.queryPermission({ mode: "read" })) === "granted"
+      ) {
+        this.setRootHandle(cachedHandle, true);
+      }
+    }
   }
 
   initServiceWorker() {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").then(
-        function (registration) {
-          // Registration was successful
+        (registration) => {
           console.log(
             "ServiceWorker registration successful with scope: ",
             registration.scope
           );
+          registration.addEventListener("updatefound", () => {
+            const newWorker = registration.installing;
+            if (this.rootHandle !== undefined) {
+              newWorker!.postMessage({
+                op: "set_root_handle",
+                data: this.rootHandle,
+              });
+            }
+            newWorker?.postMessage({
+              op: "take_over",
+            });
+          });
         },
-        function (err) {
-          // registration failed :(
+        (err) => {
           console.log("ServiceWorker registration failed: ", err);
         }
       );
@@ -64,6 +98,10 @@ export class FreezeApp extends LitElement {
 
   private async _onClick() {
     const rootHandle = await window.showDirectoryPicker();
+    this.setRootHandle(rootHandle);
+  }
+
+  setRootHandle(rootHandle: FileSystemDirectoryHandle, skipDB = false) {
     this.rootHandle = rootHandle;
     const options = {
       detail: rootHandle,
@@ -82,6 +120,11 @@ export class FreezeApp extends LitElement {
         data: rootHandle,
       });
     }
+
+    if (!skipDB) {
+      this.db?.put("keyval", rootHandle, "storedHandle");
+    }
+    console.log(`set data source: ${rootHandle.name}`);
   }
 
   private async _onSubscribe(e: CustomEvent) {

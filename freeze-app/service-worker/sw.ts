@@ -23,11 +23,10 @@ self.addEventListener("message", (event) => {
         `service worker received data source: ${dataSource.rootHandle.name}`
       );
       break;
+    case "take_over":
+      self.skipWaiting();
+      break;
   }
-});
-
-self.addEventListener("install", () => {
-  self.skipWaiting();
 });
 
 self.addEventListener("activate", () => {
@@ -123,7 +122,8 @@ const handleVideo: RouteHandlerCallback = async ({ params, request }) => {
 };
 registerRoute(makeRegexPathMatcher("^/video/(\\d+)$"), handleVideo);
 
-const handleCourse: RouteHandlerCallback = () => {
+const handleSpa: RouteHandlerCallback = () => {
   return fetch("/");
 };
-registerRoute(makeRegexPathMatcher("^/course/"), handleCourse);
+registerRoute(makeRegexPathMatcher("^/course/"), handleSpa);
+registerRoute(makePathMatcher("/download"), handleSpa);

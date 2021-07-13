@@ -84,7 +84,7 @@ export const routes: Array<Route> = (
       component: "freeze-browse",
     },
     {
-      path: "/download/",
+      path: "/download",
       component: "freeze-download",
     },
     {

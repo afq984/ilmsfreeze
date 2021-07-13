@@ -1,4 +1,4 @@
-import { RouterLocation } from "@vaadin/router";
+import { Commands, RouterLocation } from "@vaadin/router";
 import { LitElement } from "lit";
 import { FileSystemDataSource } from "./data-source";
 import { RouterSource } from "./routes";
@@ -23,10 +23,16 @@ export abstract class BaseView extends LitElement {
     return this;
   }
 
-  async onBeforeEnter(location: RouterLocation, _: any, router: RouterSource) {
+  async onBeforeEnter(
+    location: RouterLocation,
+    _: Commands,
+    router: RouterSource
+  ) {
     this.router = router;
     this.activeUrl = location.pathname;
-    await this.prepareState(location, router.dataSource!);
+    if (router.dataSource !== undefined) {
+      await this.prepareState(location, router.dataSource);
+    }
   }
 
   async prepareState(
@@ -42,7 +48,7 @@ export abstract class BaseView extends LitElement {
     e.addEventListener("directory-changed", this.directoryChangedListener);
   }
 
-  async handleDirectoryChange(_rootHandle: FileSystemDirectoryHandle) {}
+  abstract handleDirectoryChange(_rootHandle: FileSystemDirectoryHandle): Promise<any>;
 
   connectedCallback() {
     super.connectedCallback();
