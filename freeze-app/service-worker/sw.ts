@@ -8,17 +8,30 @@ import { createPartialResponse } from "workbox-range-requests";
 import { registerRoute } from "workbox-routing";
 import { FileSystemDataSource, getSavedFilename } from "./data-source";
 
+declare var self: ServiceWorkerGlobalScope;
+
 clientsClaim();
 
 let dataSource: FileSystemDataSource | null = null;
 
-addEventListener("message", (event) => {
+self.addEventListener("message", (event) => {
   const data = event.data;
   switch (data.op) {
     case "set_root_handle":
       dataSource = new FileSystemDataSource(data.data);
+      console.log(
+        `service worker received data source: ${dataSource.rootHandle.name}`
+      );
       break;
   }
+});
+
+self.addEventListener("install", () => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", () => {
+  console.log("service worker activated!");
 });
 
 const makePathMatcher = (pathname: string): RouteMatchCallback => {
