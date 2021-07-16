@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "priority": 1,
+        "action": {
+            "type": "modifyHeaders",
+            "responseHeaders": [
+                {
+                    "header": "Access-Control-Allow-Origin",
+                    "operation": "set",
+                    "value": "https://ilmsfreeze.afq984.org"
+                }
+            ]
+        },
+        "condition": {
+            "domains": ["ilmsfreeze.afq984.org"],
+            "urlFilter": "||lms.nthu.edu.tw/",
+            "resourceTypes": [
+                "xmlhttprequest"
+            ]
+        }
+    }
+]
