@@ -1,5 +1,5 @@
 import { LitElement, html } from "lit";
-import { customElement } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 import { createRef, Ref, ref } from "lit/directives/ref.js";
 
 import "./freeze-navbar";
@@ -10,6 +10,14 @@ import "./freeze-index";
 import { RouterSource, routes } from "./routes";
 import { FileSystemDataSource } from "./data-source";
 import { IDBPDatabase, openDB } from "idb";
+
+@customElement("freeze-extension-status")
+export class FreezeExtensionStatus extends LitElement {
+  @property()
+  extensionId = "";
+  @property()
+  extensionVersion = "";
+}
 
 @customElement("freeze-app")
 export class FreezeApp extends LitElement {

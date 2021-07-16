@@ -1,26 +1,13 @@
-import { html, LitElement, TemplateResult } from "lit";
+import { html, LitElement } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { externalLink, materialIcon } from "./html";
-
-type statusClass = {
-  iconName: string;
-  cssClass: string;
-};
-
-const statusSuccess: statusClass = {
-  iconName: "check",
-  cssClass: "has-text-success",
-};
-
-const statusWarn: statusClass = {
-  iconName: "warning",
-  cssClass: "has-text-warning",
-};
-
-const statusFail: statusClass = {
-  iconName: "error",
-  cssClass: "has-text-danger",
-};
+import {
+  externalLink,
+  renderStatus,
+  statusFail,
+  statusSuccess,
+  statusUnknown,
+  statusWarn,
+} from "./html";
 
 @customElement("freeze-index")
 export class FreezeIndex extends LitElement {
@@ -33,10 +20,36 @@ export class FreezeIndex extends LitElement {
   serviceWorkerStatus = statusWarn;
   @state()
   serviceWorkerDescription = "Unknown";
+  @state()
+  extensionInstalled = false;
+  @state()
+  extensionVersion = "";
+  updatedListener: EventListener;
+
+  constructor() {
+    super();
+    this.updatedListener = () => this.updateExtensionStatus();
+  }
 
   connectedCallback() {
     super.connectedCallback();
     this.checkServiceWorkerStatus();
+
+    const status = document.querySelector("freeze-extension-status") as any;
+    status.addEventListener("updated", this.updatedListener);
+    this.updateExtensionStatus();
+  }
+
+  disconnectedCallback() {
+    document
+      .querySelector("freeze-extension-status")
+      ?.removeEventListener("updated", this.updatedListener);
+  }
+
+  updateExtensionStatus() {
+    const status = document.querySelector("freeze-extension-status") as any;
+    this.extensionInstalled = status.extensionId !== "";
+    this.extensionVersion = status.extensionVersion;
   }
 
   async checkServiceWorkerStatus() {
@@ -52,16 +65,9 @@ export class FreezeIndex extends LitElement {
         this.serviceWorkerDescription = "Active";
         break;
       default:
-        this.serviceWorkerStatus = statusWarn;
+        this.serviceWorkerStatus = statusUnknown;
         this.serviceWorkerDescription = "Unknown";
     }
-  }
-
-  renderStatus(cls: statusClass, text: TemplateResult | string) {
-    return html`<span class="icon-text">
-      <span class="${cls.cssClass}">${materialIcon(cls.iconName)}</span>
-      <span>${text}</span>
-    </span>`;
   }
 
   render() {
@@ -94,8 +100,8 @@ export class FreezeIndex extends LitElement {
         <dt>
           <strong>File System Access API</strong>
           ${this.fsAvailable
-            ? this.renderStatus(statusSuccess, "Available")
-            : this.renderStatus(statusFail, "Unsupported")}
+            ? renderStatus(statusSuccess, "Available")
+            : renderStatus(statusFail, "Unsupported")}
         </dt>
         <dd>
           <em>Required</em> to load/download iLMS data from/to your disk.<br />
@@ -107,7 +113,7 @@ export class FreezeIndex extends LitElement {
         </dd>
         <dt>
           <strong>Service Worker</strong>
-          ${this.renderStatus(
+          ${renderStatus(
             this.serviceWorkerStatus,
             this.serviceWorkerDescription
           )}
@@ -119,11 +125,15 @@ export class FreezeIndex extends LitElement {
         </dd>
         <dt>
           <strong>Chrome Extension</strong>
-          ${this.renderStatus(statusWarn, "WIP")}
+          ${this.extensionInstalled
+            ? renderStatus(
+                statusSuccess,
+                `Installed (version: ${this.extensionVersion})`
+              )
+            : renderStatus(statusWarn, `Not installed`)}
         </dt>
         <dd>
-          You need the Chrome Extension to <em>download</em> from the
-          browser.<br />
+          You need the Chrome Extension to <em>download</em> from the iLMS.<br />
           Alternatively, you can load the <code>ilmsdump.out</code> directory
           produced by
           ${externalLink("ilmsdump", "https://github.com/afq984/ilmsdump")}.

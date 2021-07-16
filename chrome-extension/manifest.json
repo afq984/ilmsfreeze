@@ -1,0 +1,35 @@
+{
+    "manifest_version": 3,
+    "name": "ilmsfreeze Download Helper",
+    "version": "0",
+    "background": {
+        "service_worker": "background.js"
+    },
+    "declarative_net_request": {
+        "rule_resources": [
+            {
+                "id": "rule_NTHU",
+                "enabled": true,
+                "path": "rules/NTHU.json"
+            }
+        ]
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://ilmsfreeze.afq984.org/*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "permissions": [
+        "declarativeNetRequest",
+        "cookies"
+    ],
+    "host_permissions": [
+        "*://lms.nthu.edu.tw/*",
+        "https://ilmsfreeze.afq984.org/*"
+    ]
+}
