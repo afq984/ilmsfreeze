@@ -353,11 +353,17 @@ export class FreezeMaterial extends FreezeCourseL2Base {
     super.prepareState(location, source);
     this.materialMeta = await getParamMeta(location.params, source, "material");
     this.materialChildren = parseChildren(this.materialMeta!.children);
-    this.materialBody = await source.getText(
+    const body = await source.getText(
       "material",
       this.materialMeta!.id,
       "index.html"
     );
+
+    const rewrites: { [_: string]: string } = {};
+    for (const id of this.materialChildren.attachment || []) {
+      rewrites[`${id}.mp4`] = `/attachment/${id}`;
+    }
+    this.materialBody = rewriteHTML(body, "video", rewrites);
   }
 
   renderVideo() {
@@ -404,10 +410,7 @@ export class FreezeDiscussion extends FreezeCourseL2Base {
       for (const attachment of post.attach) {
         rewrites[attachment.fileName] = `/attachment/${attachment.id}`;
       }
-      post.note = rewriteHTML(post.note, "img", rewrites, (src) => {
-        const split = src.split("/");
-        return split[split.length - 1];
-      });
+      post.note = rewriteHTML(post.note, "img", rewrites);
     }
   }
 
