@@ -543,7 +543,7 @@ export class FreezeSubmission extends FreezeHomeworkSubmissions {
       href: this.router!.urlForName("freeze-submission", {
         course_id: this.courseMeta!.id.toString(),
         homework_id: this.homeworkMeta!.id.toString(),
-        submission_id: meta.id.toString(),
+        submittedhomework_id: meta.id.toString(),
       }),
       active: true,
     });
