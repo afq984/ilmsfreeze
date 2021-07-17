@@ -1,9 +1,10 @@
-import "./freeze-404";
 import { IndexedParams, RouterLocation } from "@vaadin/router";
 import { html, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
+import "./freeze-no-source";
+import "./freeze-404";
 import { BaseView } from "./base-view.js";
 import { FileSystemDataSource } from "./data-source.js";
 import { Fragment, fragmentsPush, homeFragment } from "./freeze-pathbar.js";
@@ -44,7 +45,6 @@ const getParamMeta = async (
   const id = getParamId(params, `${typename}_id`);
   return await source.getMeta(typename, id);
 };
-
 abstract class FreezeCourseBase extends BaseView {
   @state()
   courseMeta?: CourseMeta;
@@ -70,6 +70,9 @@ abstract class FreezeCourseBase extends BaseView {
   }
 
   render() {
+    if (this.router!.dataSource === undefined) {
+      return html`<freeze-no-source></freeze-no-source>`;
+    }
     if (this.courseMeta === undefined) {
       return html`<freeze-404></freeze-404>`;
     }

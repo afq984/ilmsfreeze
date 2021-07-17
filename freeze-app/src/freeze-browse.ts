@@ -7,13 +7,16 @@ import { FileSystemDataSource } from "./data-source.js";
 import { TableFields, textField } from "./freeze-table";
 import "./freeze-pathbar";
 import { CourseMeta } from "./types.js";
-
+import "./freeze-no-source";
 @customElement("freeze-browse")
 export class FreezeBrowse extends BaseView {
   @property({ attribute: false })
   courses: Array<CourseMeta> = [];
 
   render() {
+    if (this.router!.dataSource === undefined) {
+      return html`<freeze-no-source></freeze-no-source>`;
+    }
     const linkfn = (item: CourseMeta, attr: any) => {
       const url = this.router!.urlForName("freeze-course", {
         course_id: item.id.toString(),
