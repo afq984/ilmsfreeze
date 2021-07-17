@@ -21,9 +21,10 @@ const getLoginState = async () => {
     await response.text(),
     "text/html"
   );
-  console.log(body);
   const profile = body.querySelector("#profile");
-  if (profile === null) return renderStatus(statusWarn, "Logged Out");
+  if (profile === null) {
+    return renderStatus(statusWarn, "Logged Out");
+  }
   return renderStatus(statusSuccess, "Logged In");
 };
 
