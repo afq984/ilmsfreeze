@@ -1,8 +1,8 @@
-import { html } from "lit";
+import { html, LitElement } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import { BaseView } from "./base-view.js";
 import {
+  externalLink,
   renderStatus,
   statusFail,
   statusSuccess,
@@ -23,15 +23,23 @@ const getLoginState = async () => {
   );
   const profile = body.querySelector("#profile");
   if (profile === null) {
-    return renderStatus(statusWarn, "Logged Out");
+    return renderStatus(statusWarn, "Logged out");
   }
-  return renderStatus(statusSuccess, "Logged In");
+  const nameTag = profile.querySelector("span.lt");
+  console.assert(nameTag !== null);
+  console.assert(nameTag!.textContent!.trim() === "Name:");
+  const loggedInAs = nameTag!.nextSibling!.textContent;
+  return renderStatus(statusSuccess, `Logged in as ${loggedInAs}`);
 };
 
 @customElement("freeze-download")
-export class FreezeDownload extends BaseView {
+export class FreezeDownload extends LitElement {
   @state()
   ilmsAccess = renderStatus(statusUnknown, "Unknown");
+
+  createRenderRoot() {
+    return this;
+  }
 
   connectedCallback() {
     super.connectedCallback();
@@ -42,10 +50,11 @@ export class FreezeDownload extends BaseView {
     this.ilmsAccess = await getLoginState();
   }
 
-  renderState() {
-    return html` <h2 class="title is-2">Not implemented</h2>
-      <p>${this.ilmsAccess}</p>`;
+  render() {
+    return html`<h2 class="title">ilmsfreeze download</h2>
+      <p>
+        ${externalLink("iLMS", "https://lms.nthu.edu.tw")} status:
+        ${this.ilmsAccess}
+      </p>`;
   }
-
-  async prepareState() {}
 }
