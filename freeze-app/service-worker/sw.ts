@@ -6,7 +6,9 @@ import {
 } from "workbox-core/types";
 import { createPartialResponse } from "workbox-range-requests";
 import { registerRoute } from "workbox-routing";
+import { getRedirectLocation } from "./course-php";
 import { FileSystemDataSource, getSavedFilename } from "./data-source";
+import { RenderableError } from "./errors";
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -127,3 +129,17 @@ const handleSpa: RouteHandlerCallback = () => {
 };
 registerRoute(makeRegexPathMatcher("^/course/"), handleSpa);
 registerRoute(makePathMatcher("/download"), handleSpa);
+
+const redirectCoursePHP: RouteHandlerCallback = async ({ url }) => {
+  let location: string;
+  try {
+    location = getRedirectLocation(url.searchParams);
+  } catch (e) {
+    if (e instanceof RenderableError) {
+      return new Response(e.message, { status: e.title === "404" ? 404 : 400 });
+    }
+    throw e;
+  }
+  return Response.redirect(location);
+};
+registerRoute(makePathMatcher("/course.php"), redirectCoursePHP);

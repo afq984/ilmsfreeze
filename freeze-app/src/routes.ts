@@ -1,5 +1,7 @@
 import { Commands, Context, Route, Router } from "@vaadin/router";
+import { getRedirectLocation } from "./course-php";
 import { FileSystemDataSource } from "./data-source";
+import { RenderableError } from "./errors";
 
 export interface MenuItem {
   typename?: string;
@@ -116,11 +118,27 @@ export const routes: Array<Route> = (
       action: actionOpenBlank,
     },
     {
-      path: "/sys/read_attach.php(.*)",
+      path: "/sys/read_attach.php",
       action: actionOpenBlank,
     },
   ] as Array<Route>
 ).concat(menuItems as Array<Route>, [
+  {
+    path: "/course.php",
+    action: async (context, commands) => {
+      const params = new URLSearchParams(context.search);
+      let redirectLocation: string;
+      try {
+        redirectLocation = getRedirectLocation(params);
+      } catch (e) {
+        if (e instanceof RenderableError) {
+          return commands.component("freeze-404");
+        }
+        throw e;
+      }
+      return commands.redirect(redirectLocation);
+    },
+  },
   {
     path: "(.*)",
     component: "freeze-404",
