@@ -1,19 +1,22 @@
 import { Commands, RouterLocation } from "@vaadin/router";
-import { LitElement } from "lit";
+import { LitElement, TemplateResult } from "lit";
 import { FileSystemDataSource } from "./data-source";
+import { errorNoSource, RenderableError } from "./errors";
+import { renderError } from "./html";
 import { RouterSource } from "./routes";
 
 export abstract class BaseView extends LitElement {
-  subscribedTo?: Element;
-  directoryChangedListener: EventListener;
+  private subscribedTo?: Element;
+  private directoryChangedListener: EventListener;
   location?: RouterLocation;
   activeUrl?: string;
   router?: RouterSource;
+  error?: RenderableError;
 
   constructor() {
     super();
-    this.directoryChangedListener = async (e: Event) => {
-      await this.handleDirectoryChange(
+    this.directoryChangedListener = (e: Event) => {
+      this.handleDirectoryChange(
         (e as CustomEvent).detail as FileSystemDirectoryHandle
       );
     };
@@ -31,14 +34,9 @@ export abstract class BaseView extends LitElement {
     this.router = router;
     this.activeUrl = location.pathname;
     if (router.dataSource !== undefined) {
-      await this.prepareState(location, router.dataSource);
+      await this.prepareStateProtected(router.dataSource);
     }
   }
-
-  async prepareState(
-    _location: RouterLocation,
-    _source: FileSystemDataSource
-  ) {}
 
   private async subscribe(e: Element, rootHandle?: FileSystemDirectoryHandle) {
     this.subscribedTo = e;
@@ -47,10 +45,6 @@ export abstract class BaseView extends LitElement {
     }
     e.addEventListener("directory-changed", this.directoryChangedListener);
   }
-
-  abstract handleDirectoryChange(
-    _rootHandle: FileSystemDirectoryHandle
-  ): Promise<any>;
 
   connectedCallback() {
     super.connectedCallback();
@@ -69,4 +63,45 @@ export abstract class BaseView extends LitElement {
       this.directoryChangedListener
     );
   }
+
+  private async handleDirectoryChange(rootHandle: FileSystemDirectoryHandle) {
+    const source = new FileSystemDataSource(rootHandle);
+    await this.prepareStateProtected(source);
+    this.requestUpdate();
+  }
+
+  private async prepareStateProtected(source: FileSystemDataSource) {
+    try {
+      await this.prepareState(this.location!, source);
+    } catch (e) {
+      if (e instanceof RenderableError) {
+        this.error = e;
+        return;
+      }
+      this.error = new RenderableError(
+        "(╯°□°)╯︵ ┻┻",
+        "Something really bad happened. Please report a bug."
+      );
+      console.error(e);
+      return;
+    }
+    this.error = undefined;
+  }
+
+  render() {
+    if (this.error !== undefined) {
+      return renderError(this.error);
+    }
+    if (this.router!.dataSource === undefined) {
+      return renderError(errorNoSource());
+    }
+    return this.renderState();
+  }
+
+  abstract prepareState(
+    _location: RouterLocation,
+    _source: FileSystemDataSource
+  ): Promise<any>;
+
+  abstract renderState(): TemplateResult;
 }

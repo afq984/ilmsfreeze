@@ -26,10 +26,12 @@ export class FreezeApp extends LitElement {
   mainRef: Ref<Element> = createRef();
   router: RouterSource;
   db?: IDBPDatabase;
+  private dbInitDone: Promise<void>;
 
   constructor() {
     super();
     this.router = new RouterSource();
+    this.dbInitDone = this.initDB();
   }
 
   createRenderRoot() {
@@ -39,10 +41,10 @@ export class FreezeApp extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this.initServiceWorker();
-    this.initDB();
   }
 
-  firstUpdated() {
+  async firstUpdated() {
+    await this.dbInitDone;
     this.router.setOutlet(this.mainRef.value!);
     this.router.setRoutes(routes);
   }

@@ -42,10 +42,10 @@ export class FreezeDownload extends BaseView {
     this.ilmsAccess = await getLoginState();
   }
 
-  render() {
+  renderState() {
     return html` <h2 class="title is-2">Not implemented</h2>
       <p>${this.ilmsAccess}</p>`;
   }
 
-  async handleDirectoryChange() {}
+  async prepareState() {}
 }

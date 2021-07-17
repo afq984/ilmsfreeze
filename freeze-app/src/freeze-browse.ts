@@ -13,10 +13,7 @@ export class FreezeBrowse extends BaseView {
   @property({ attribute: false })
   courses: Array<CourseMeta> = [];
 
-  render() {
-    if (this.router!.dataSource === undefined) {
-      return html`<freeze-no-source></freeze-no-source>`;
-    }
+  renderState() {
     const linkfn = (item: CourseMeta, attr: any) => {
       const url = this.router!.urlForName("freeze-course", {
         course_id: item.id.toString(),
@@ -45,10 +42,5 @@ export class FreezeBrowse extends BaseView {
 
   async prepareState(_location: RouterLocation, source: FileSystemDataSource) {
     this.courses = await source.getAllMeta("course");
-  }
-
-  async handleDirectoryChange(rootHandle: FileSystemDirectoryHandle) {
-    const source = new FileSystemDataSource(rootHandle);
-    await this.prepareState(this.location!, source);
   }
 }

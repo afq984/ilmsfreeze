@@ -1,6 +1,8 @@
 import { html, TemplateResult } from "lit";
+import { classMap } from "lit/directives/class-map.js";
 import { StyleInfo, styleMap } from "lit/directives/style-map.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { RenderableError } from "./errors";
 
 export const materialIcon = (
   name: string,
@@ -51,4 +53,16 @@ export const renderStatus = (
     <span class="${cls.cssClass}">${materialIcon(cls.iconName)}</span>
     <span>${text}</span>
   </span>`;
+};
+
+export const renderError = (err: RenderableError) => {
+  const classes = {
+    "has-text-centered": true,
+    oops: true,
+    x2: err.title === "404",
+  };
+  return html`<div>
+    <div class="${classMap(classes)}">${err.title}</div>
+    <div class="has-text-centered">${err.message}</div>
+  </div>`;
 };
