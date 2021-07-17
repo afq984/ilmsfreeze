@@ -9,7 +9,7 @@ export class Freeze404 extends LitElement {
 
   render() {
     return html`<div>
-      <div class="oops has-text-centered" style="font-size: 192px">404</div>
+      <div class="oops x2 has-text-centered">404</div>
       <div class="has-text-centered">Page not found</div>
     </div>`;
   }

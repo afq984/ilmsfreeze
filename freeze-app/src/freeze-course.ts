@@ -1,6 +1,6 @@
 import { IndexedParams, RouterLocation } from "@vaadin/router";
 import { html, TemplateResult } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import "./freeze-no-source";
@@ -46,11 +46,9 @@ const getParamMeta = async (
   return await source.getMeta(typename, id);
 };
 abstract class FreezeCourseBase extends BaseView {
-  @state()
   courseMeta?: CourseMeta;
-  @state()
   courseChildren?: ChildrenMap;
-  abstract get fragments(): Array<Fragment>;
+  abstract fragments(): Array<Fragment>;
 
   constructor() {
     super();
@@ -64,20 +62,9 @@ abstract class FreezeCourseBase extends BaseView {
 
   abstract renderBody(): string | TemplateResult;
 
-  async handleDirectoryChange(rootHandle: FileSystemDirectoryHandle) {
-    const source = new FileSystemDataSource(rootHandle);
-    await this.prepareState(this.location!, source);
-  }
-
-  render() {
-    if (this.router!.dataSource === undefined) {
-      return html`<freeze-no-source></freeze-no-source>`;
-    }
-    if (this.courseMeta === undefined) {
-      return html`<freeze-404></freeze-404>`;
-    }
+  renderState() {
     return html`
-      <freeze-pathbar .fragments=${this.fragments}></freeze-pathbar>
+      <freeze-pathbar .fragments=${this.fragments()}></freeze-pathbar>
       <div class="columns">
         <freeze-sidemenu
           class="column is-one-fifth"
@@ -94,10 +81,9 @@ abstract class FreezeCourseBase extends BaseView {
 
 @customElement("freeze-course")
 export class FreezeCourseOverview extends FreezeCourseBase {
-  @state()
   body = "";
 
-  get fragments() {
+  fragments() {
     return [
       homeFragment,
       {
@@ -129,7 +115,7 @@ abstract class FreezeCourseL2Base extends FreezeCourseBase {
     return this.menuItem.typename!;
   }
 
-  get fragments(): Fragment[] {
+  fragments(): Fragment[] {
     const course_id_param = { course_id: this.courseMeta!.id.toString() };
     return [
       homeFragment,
@@ -153,7 +139,6 @@ abstract class FreezeCourseL2Base extends FreezeCourseBase {
 export class FreezeCourseScore extends FreezeCourseL2Base {
   menuItem = menuItemScore;
 
-  @state()
   body = "";
 
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
@@ -174,7 +159,6 @@ export class FreezeCourseScore extends FreezeCourseL2Base {
 export class FreezeCourseGrouplist extends FreezeCourseL2Base {
   menuItem = menuItemGrouplist;
 
-  @state()
   body = "";
 
   async prepareState(location: RouterLocation, source: FileSystemDataSource) {
@@ -192,7 +176,6 @@ export class FreezeCourseGrouplist extends FreezeCourseL2Base {
 }
 
 abstract class FreezeCourseTable<T> extends FreezeCourseL2Base {
-  @state()
   table: Array<T> = [];
   abstract fields(): TableFields;
 
@@ -278,9 +261,9 @@ export class FreezeAnnouncement extends FreezeCourseL2Base {
   news: any;
   attachments?: Array<AttachmentMeta>;
 
-  get fragments() {
+  fragments() {
     const meta = this.announcementMeta!;
-    return fragmentsPush(super.fragments, {
+    return fragmentsPush(super.fragments(), {
       text: meta.title,
       href: this.router!.urlForName("freeze-announcement", {
         course_id: this.courseMeta!.id.toString(),
@@ -353,9 +336,9 @@ export class FreezeMaterial extends FreezeCourseL2Base {
   materialChildren?: ChildrenMap;
   materialBody?: string;
 
-  get fragments() {
+  fragments() {
     const meta = this.materialMeta!;
-    return fragmentsPush(super.fragments, {
+    return fragmentsPush(super.fragments(), {
       text: meta.title,
       href: this.router!.urlForName("freeze-material", {
         course_id: this.courseMeta!.id.toString(),
@@ -413,9 +396,9 @@ export class FreezeDiscussion extends FreezeCourseL2Base {
     );
   }
 
-  get fragments() {
+  fragments() {
     const meta = this.discussionMeta!;
-    return fragmentsPush(super.fragments, {
+    return fragmentsPush(super.fragments(), {
       text: meta.title,
       href: this.router!.urlForName("freeze-discussion", {
         course_id: this.courseMeta!.id.toString(),
@@ -455,15 +438,12 @@ export class FreezeDiscussion extends FreezeCourseL2Base {
 export class FreezeHomework extends FreezeCourseL2Base {
   menuItem = menuItemHomework;
 
-  @state()
   homeworkMeta?: HomeworkMeta;
-  @state()
   homeworkChildren?: ChildrenMap;
-  @state()
   body = "";
 
-  get fragments() {
-    const frag = super.fragments;
+  fragments() {
+    const frag = super.fragments();
     const hw_params = {
       course_id: this.courseMeta!.id.toString(),
       homework_id: this.homeworkMeta!.id.toString(),
@@ -499,11 +479,10 @@ export class FreezeHomework extends FreezeCourseL2Base {
 
 @customElement("freeze-homework-submissions")
 export class FreezeHomeworkSubmissions extends FreezeHomework {
-  @state()
   submissions?: SubmissionMeta[];
 
-  get fragments() {
-    const frag = super.fragments;
+  fragments() {
+    const frag = super.fragments();
     frag[frag.length - 2].active = false;
     frag[frag.length - 1].active = true;
     return frag;
@@ -557,9 +536,9 @@ export class FreezeSubmission extends FreezeHomeworkSubmissions {
   submissionMeta?: SubmissionMeta;
   submissionBody = "";
 
-  get fragments() {
+  fragments() {
     const meta = this.submissionMeta!;
-    return fragmentsPush(super.fragments, {
+    return fragmentsPush(super.fragments(), {
       text: meta.title,
       href: this.router!.urlForName("freeze-submission", {
         course_id: this.courseMeta!.id.toString(),
