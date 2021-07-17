@@ -1,3 +1,4 @@
+import "./freeze-404";
 import { IndexedParams, RouterLocation } from "@vaadin/router";
 import { html, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
@@ -70,7 +71,7 @@ abstract class FreezeCourseBase extends BaseView {
 
   render() {
     if (this.courseMeta === undefined) {
-      return html`404`;
+      return html`<freeze-404></freeze-404>`;
     }
     return html`
       <freeze-pathbar .fragments=${this.fragments}></freeze-pathbar>

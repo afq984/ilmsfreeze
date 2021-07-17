@@ -7,6 +7,7 @@ import "./freeze-browse";
 import "./freeze-download";
 import "./freeze-course";
 import "./freeze-index";
+import "./freeze-404";
 import { RouterSource, routes } from "./routes";
 import { FileSystemDataSource } from "./data-source";
 import { IDBPDatabase, openDB } from "idb";

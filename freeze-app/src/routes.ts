@@ -120,7 +120,12 @@ export const routes: Array<Route> = (
       action: actionOpenBlank,
     },
   ] as Array<Route>
-).concat(menuItems as Array<Route>);
+).concat(menuItems as Array<Route>, [
+  {
+    path: "(.*)",
+    component: "freeze-404",
+  },
+]);
 
 export class RouterSource extends Router {
   dataSource?: FileSystemDataSource;

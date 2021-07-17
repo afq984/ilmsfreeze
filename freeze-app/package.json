@@ -8,7 +8,7 @@
     "workbox-routing": "^6.1.5"
   },
   "scripts": {
-    "build": "rimraf out && tsc --build src service-worker && rollup -c rollup.config.js",
+    "build": "rimraf out && tsc --build src service-worker && rollup -c rollup.config.js && ln -sf index.html out/dist/404.html",
     "start": "tsc --build src service-worker && rollup -c rollup-start.config.js && concurrently -k -r \"tsc --build src service-worker --watch --preserveWatchOutput\" \"rollup --watch -c rollup-start.config.js\" \"wds\"",
     "lint": "lit-analyzer && eslint 'src/**/*.ts' 'service-worker/**/*.ts'",
     "format": "prettier \"**/*.{js,mjs,ts}\" --ignore-path .gitignore --write",
