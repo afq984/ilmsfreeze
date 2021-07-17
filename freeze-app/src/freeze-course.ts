@@ -31,6 +31,7 @@ import {
   parseChildren,
   SubmissionMeta,
 } from "./types.js";
+import { rewriteHTML } from "./rewrite";
 
 const getParamId = (params: IndexedParams, field: string) => {
   const str = params[field].toString();
@@ -394,6 +395,20 @@ export class FreezeDiscussion extends FreezeCourseL2Base {
       this.discussionMeta!.id,
       "index.json"
     );
+
+    for (const post of this.discussionJson.posts.items) {
+      if (!post.note.trim()) {
+        continue;
+      }
+      const rewrites: { [_: string]: string } = {};
+      for (const attachment of post.attach) {
+        rewrites[attachment.fileName] = `/attachment/${attachment.id}`;
+      }
+      post.note = rewriteHTML(post.note, "img", rewrites, (src) => {
+        const split = src.split("/");
+        return split[split.length - 1];
+      });
+    }
   }
 
   fragments() {
