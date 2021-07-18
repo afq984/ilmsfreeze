@@ -16,7 +16,7 @@ export const parseChildren = (children: Array<string>) => {
 export interface CourseMeta {
   id: number;
   serial: string;
-  is_admin: string;
+  is_admin: boolean;
   name: string;
   children: Array<string>;
 }

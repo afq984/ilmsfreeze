@@ -1,5 +1,6 @@
 import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
+import { materialIcon } from "./html";
 @customElement("freeze-navbar")
 export class FreezeNavbar extends LitElement {
   createRenderRoot() {
@@ -44,7 +45,9 @@ export class FreezeNavbar extends LitElement {
                   class="button is-primary"
                   @click="${this._dispatchClick}"
                 >
-                  <strong>Open Directory...</strong>
+                  <strong class="icon-text"
+                    >${materialIcon("folder")}<span>Open...</span></strong
+                  >
                 </button>
               </div>
             </div>

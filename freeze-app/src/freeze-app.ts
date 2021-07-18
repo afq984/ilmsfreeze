@@ -102,6 +102,7 @@ export class FreezeApp extends LitElement {
           ${ref(this.mainRef)}
           class="container"
           @subscribe=${this._onSubscribe}
+          @request-write=${this._onRequestWrite}
         ></main>
       </div>
     `;
@@ -110,6 +111,22 @@ export class FreezeApp extends LitElement {
   private async _onClick() {
     const rootHandle = await window.showDirectoryPicker();
     this.setRootHandle(rootHandle);
+  }
+
+  private async _onRequestWrite() {
+    console.log(this);
+    if (this.rootHandle === undefined) {
+      return;
+    }
+    const rw = await this.rootHandle.queryPermission({ mode: "readwrite" });
+    if (rw === "prompt") {
+      await this.rootHandle.requestPermission({ mode: "readwrite" });
+      this.dispatchEvent(
+        new CustomEvent("directory-changed", {
+          detail: this.rootHandle,
+        })
+      );
+    }
   }
 
   setRootHandle(rootHandle: FileSystemDirectoryHandle, skipDB = false) {
