@@ -192,14 +192,25 @@ export class FreezeDump extends BaseView {
         <div class="panel">
           <p class="panel-heading">Downloading 0/${this.queue.length}</p>
 
-          ${this.queue.map(
-            (course) =>
-              html`
-                <span class="panel-block">
-                  <freeze-dump-course .course=${course}></freeze-dump-course>
-                </span>
-              `
-          )}
+          ${this.queue.length
+            ? this.queue.map(
+                (course) =>
+                  html`
+                    <span class="panel-block">
+                      <freeze-dump-course
+                        .course=${course}
+                      ></freeze-dump-course>
+                    </span>
+                  `
+              )
+            : html`<span class="panel-block">
+                <div style="width: 100%">
+                  <div class="oops has-text-centered">ᕦ( ᐛ )ᕡ</div>
+                  <div class=" has-text-centered">
+                    No courses queued for download.
+                  </div>
+                </div>
+              </span>`}
         </div>
       </div>
     `;
