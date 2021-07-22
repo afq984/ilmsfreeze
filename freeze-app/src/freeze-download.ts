@@ -1,8 +1,8 @@
 import { RouterLocation } from "@vaadin/router";
 import { html, LitElement } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { customElement, query, state } from "lit/decorators.js";
 import { BaseView } from "./base-view.js";
-import { getEnrolledCourses } from "./crawler.js";
+import { getCourse, getEnrolledCourses } from "./crawler.js";
 import { FileSystemDataSource } from "./data-source.js";
 import { RenderableError } from "./errors.js";
 
@@ -116,6 +116,8 @@ export class FreezeDump extends BaseView {
   @state()
   queue: CourseMeta[] = [];
   added: { [_: number]: boolean } = {};
+  @query("#dump-course-id")
+  courseIdInput!: HTMLInputElement;
 
   async prepareState(_location: RouterLocation, source: FileSystemDataSource) {
     if (
@@ -131,14 +133,27 @@ export class FreezeDump extends BaseView {
     this.courses = await getEnrolledCourses();
   }
 
+  addCourse(course: CourseMeta) {
+    if (this.added[course.id]) {
+      return;
+    }
+    this.added[course.id] = true;
+    this.queue.push(course);
+  }
+
   addEnrolledCourses() {
     for (const course of this.courses) {
       if (course.id in this.added) {
         continue;
       }
-      this.added[course.id] = true;
-      this.queue.push(course);
+      this.addCourse(course);
     }
+    this.requestUpdate();
+  }
+
+  async addSelectedCourse() {
+    const course = await getCourse(parseInt(this.courseIdInput.value));
+    this.addCourse(course);
     this.requestUpdate();
   }
 
@@ -148,13 +163,14 @@ export class FreezeDump extends BaseView {
         <div class="field has-addons">
           <div class="control">
             <input
+              id="dump-course-id"
               class="input has-text-centered"
               type="text"
               placeholder="Course ID"
             />
           </div>
           <div class="control">
-            <button class="button is-info">
+            <button class="button is-info" @click=${this.addSelectedCourse}>
               ${materialIcon("download")}
               <span>Download</span>
             </button>
