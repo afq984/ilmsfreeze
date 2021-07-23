@@ -1,6 +1,9 @@
 export type ChildrenMap = { [key: string]: Array<number> };
 
-export const parseChildren = (children: Array<string>) => {
+export const parseChildren = (children?: Array<string>) => {
+  if (children === undefined) {
+    return {};
+  }
   const result: ChildrenMap = {};
   for (const child of children) {
     const [camelTypeName, id] = child.split("-", 2);
@@ -18,13 +21,13 @@ export interface CourseMeta {
   serial: string;
   is_admin: boolean;
   name: string;
-  children: Array<string>;
+  children?: Array<string>;
 }
 export interface AnnouncementMeta {
   id: number;
   title: string;
   course: string;
-  children: Array<string>;
+  children?: Array<string>;
 }
 
 export interface MaterialMeta {
@@ -32,21 +35,21 @@ export interface MaterialMeta {
   title: string;
   type: string;
   course: string;
-  children: Array<string>;
+  children?: Array<string>;
 }
 
 export interface DiscussionMeta {
   id: number;
   title: string;
   course: string;
-  children: Array<string>;
+  children?: Array<string>;
 }
 
 export interface HomeworkMeta {
   id: number;
   title: string;
   course: string;
-  children: Array<string>;
+  children?: Array<string>;
 }
 
 export interface SubmissionMeta {
@@ -55,7 +58,7 @@ export interface SubmissionMeta {
   by: string;
   course: string;
   comment: null | string;
-  children: Array<string>;
+  children?: Array<string>;
 }
 
 export interface AttachmentMeta {
@@ -63,5 +66,14 @@ export interface AttachmentMeta {
   title: string;
   parent: string;
   saved_filename?: string;
-  children: Array<string>;
+  children?: Array<string>;
+}
+
+export interface GroupListMeta {
+  course: string;
+}
+
+export interface VideoMeta {
+  id: number;
+  url: string;
 }

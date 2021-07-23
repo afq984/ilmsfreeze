@@ -90,6 +90,5 @@ export const getCourse = async (course_id: number): Promise<CourseMeta> => {
     serial: serial,
     name: name,
     is_admin: is_admin,
-    children: [],
   };
 };
