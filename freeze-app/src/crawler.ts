@@ -74,7 +74,9 @@ export const getCourse = async (course_id: number): Promise<CourseMeta> => {
   const hint = html.querySelector(
     "div.infoTable td:nth-of-type(2)>span.hint"
   )!.textContent;
-  const m = hint!.match(new RegExp(`\([^,()]+, ([^,()]+), [^,()]+, [^,()]+\)`));
+  const m = hint!.match(
+    new RegExp(`\\([^,()]+, ([^,()]+), [^,()]+, [^,()]+\\)`)
+  );
   if (!m) {
     throw new Bug(hint || "hint is null");
   }
