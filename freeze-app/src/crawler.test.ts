@@ -44,4 +44,12 @@ suite("getCourse", () => {
       "Empty response returend from course, the course probably doesn't exist: course_id=0"
     );
   });
+
+  test("authentication required", async () => {
+    assert.throws(
+      await capture(getCourse(43477)),
+      RenderableError,
+      "No access to course: course_id=43477"
+    );
+  });
 });
