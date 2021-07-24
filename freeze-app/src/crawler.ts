@@ -1,5 +1,6 @@
 import { error403 } from "./errors";
 import { AnnouncementMeta, CourseMeta } from "./types";
+import { $x, $x1 } from "./xpath";
 import { Bug, check, mustParseInt, notnull } from "./utils";
 
 const fetch200 = async (url: RequestInfo) => {
@@ -8,29 +9,8 @@ const fetch200 = async (url: RequestInfo) => {
   return response;
 };
 
-const parse = (body: string) =>
+export const parse = (body: string) =>
   new DOMParser().parseFromString(body, "text/html");
-
-const $x = <T extends Node>(
-  xpathExpression: string,
-  contextNode: Node
-): T[] => {
-  const iterator = (
-    (contextNode.ownerDocument || contextNode) as Document
-  ).evaluate(xpathExpression, contextNode);
-  const result = [];
-  let item: Node | null;
-  while ((item = iterator.iterateNext()) !== null) {
-    result.push(item as T);
-  }
-  return result;
-};
-
-const $x1 = <T extends Node>(xpathExpression: string, contextNode: Node): T => {
-  const results = $x<T>(xpathExpression, contextNode);
-  check(results.length === 1, results.length);
-  return results[0];
-};
 
 export const getEnrolledCourses = async (): Promise<CourseMeta[]> => {
   const response = await fetch200(
