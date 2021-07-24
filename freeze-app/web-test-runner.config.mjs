@@ -9,4 +9,9 @@ export default {
       },
     }),
   ],
+  testFramework: {
+    config: {
+      ui: "tdd",
+    },
+  },
 };

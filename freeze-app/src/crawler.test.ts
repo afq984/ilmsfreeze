@@ -1,13 +1,15 @@
-import { expect } from "@esm-bundle/chai";
+import { assert } from "@esm-bundle/chai";
 import { getCourse } from "./crawler";
 import * as td from "./testdata";
 
-it("cors configured properly", async () => {
+test("cors configured properly", async () => {
   const response = await fetch("https://lms.nthu.edu.tw");
-  expect(response.status).to.equal(200);
+  assert.equal(response.status, 200);
 });
 
-it("getCourse", async () => {
-  expect(await getCourse(74)).deep.equal(td.COURSE_74);
-  expect(await getCourse(46274)).deep.equal(td.COURSE_46274);
+test("getCourse", async () => {
+  assert.deepEqual(await getCourse(46274), td.COURSE_46274);
+  assert.deepEqual(await getCourse(74), td.COURSE_74);
+  assert.deepEqual(await getCourse(40596), td.COURSE_40596);
+  assert.deepEqual(await getCourse(1808), td.COURSE_1808);
 });
