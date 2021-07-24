@@ -1,5 +1,6 @@
 import { error403 } from "./errors";
 import { AnnouncementMeta, CourseMeta } from "./types";
+import { Bug, check, mustParseInt, notnull } from "./utils";
 
 const fetch200 = async (url: RequestInfo) => {
   const response = await fetch(url);
@@ -9,19 +10,6 @@ const fetch200 = async (url: RequestInfo) => {
 
 const parse = (body: string) =>
   new DOMParser().parseFromString(body, "text/html");
-
-const check = (condition: boolean, ...message: any) => {
-  if (!condition) {
-    throw new Bug(`check failed: ${message}`);
-  }
-};
-
-const notnull = <T>(value: T | null): T => {
-  if (value === null) {
-    throw new Bug();
-  }
-  return value;
-};
 
 const $x = <T extends Node>(
   xpathExpression: string,
@@ -44,8 +32,6 @@ const $x1 = <T extends Node>(xpathExpression: string, contextNode: Node): T => {
   return results[0];
 };
 
-const Bug = Error;
-
 export const getEnrolledCourses = async (): Promise<CourseMeta[]> => {
   const response = await fetch200(
     "https://lms.nthu.edu.tw/home.php?f=allcourse"
@@ -66,11 +52,13 @@ export const getEnrolledCourses = async (): Promise<CourseMeta[]> => {
       tag = a;
     }
 
-    const name = tag.textContent!;
-    const serial = a.parentElement!.parentElement!.childNodes[1].textContent!;
+    const name = notnull(tag.textContent);
+    const serial = notnull(
+      a.parentElement!.parentElement!.childNodes[1].textContent
+    );
 
-    const courseURL = a.getAttribute("href");
-    const m = courseURL!.match(new RegExp("/course/(\\d+)"));
+    const courseURL = notnull(a.getAttribute("href"));
+    const m = courseURL.match(new RegExp("/course/(\\d+)"));
     if (m === null) {
       throw Bug(`invalid course URL ${courseURL}`);
     }
@@ -105,11 +93,13 @@ export const getCourse = async (course_id: number): Promise<CourseMeta> => {
   const html = parse(body);
   const name = $x1<Text>('//div[@class="infoPath"]/a/text()', html).nodeValue!;
 
-  const hint = $x1<Text>(
-    '//div[@class="infoTable"]//td[2]/span[@class="hint"]/text()',
-    html
-  ).nodeValue!;
-  const m = hint!.match(
+  const hint = notnull(
+    $x1<Text>(
+      '//div[@class="infoTable"]//td[2]/span[@class="hint"]/text()',
+      html
+    ).nodeValue
+  );
+  const m = hint.match(
     new RegExp(`\\([^,()]+, ([^,()]+), [^,()]+, [^,()]+\\)`)
   );
   if (!m) {
@@ -148,25 +138,13 @@ const mustGetQs = (href: string, q: string) => {
   return value;
 };
 
-const mustParseInt = (s: string) => {
-  const value = parseInt(s);
-  if (isFinite(value)) {
-    return value;
-  }
-  throw Bug;
-};
-
 const buildURL = (path: string, query: Record<string, string>): string => {
   const url = new URL(path);
   url.search = new URLSearchParams(query).toString();
   return url.toString();
 };
 
-async function* flattenPaginator(
-  courseMeta: CourseMeta,
-  f: string,
-  page: number = 1
-) {
+async function* flattenPaginator(courseMeta: CourseMeta, f: string, page = 1) {
   while (true) {
     const response = await fetch200(
       buildURL("https://lms.nthu.edu.tw/course.php", {
