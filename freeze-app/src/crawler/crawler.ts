@@ -1,9 +1,8 @@
-import { error403 } from "../errors";
-import { AnnouncementMeta, CourseMeta } from "../types";
-import { $x, $x1 } from "./xpath";
+import { CourseMeta } from "../types";
 import { Bug, check, mustParseInt, notnull } from "../utils";
+import { $x } from "./xpath";
 
-const fetch200 = async (url: RequestInfo) => {
+export const fetch200 = async (url: RequestInfo) => {
   const response = await fetch(url);
   console.assert(response.ok, response.status);
   return response;
@@ -12,7 +11,7 @@ const fetch200 = async (url: RequestInfo) => {
 export const parse = (body: string) =>
   new DOMParser().parseFromString(body, "text/html");
 
-const mustGetQs = (href: string, q: string) => {
+export const mustGetQs = (href: string, q: string) => {
   const url = new URL(href, "https://example.com");
   const value = url.searchParams.get(q);
   if (value === null) {
@@ -21,13 +20,16 @@ const mustGetQs = (href: string, q: string) => {
   return value;
 };
 
-const buildURL = (path: string, query: Record<string, string>): string => {
+export const buildURL = (
+  path: string,
+  query: Record<string, string>
+): string => {
   const url = new URL(path, "https://lms.nthu.edu.tw");
   url.search = new URLSearchParams(query).toString();
   return url.toString();
 };
 
-const tableIsEmpty = (html: Document) => {
+export const tableIsEmpty = (html: Document) => {
   const secondRowTds = $x('//div[@class="tableBox"]/table//tr[2]/td', html);
   if (secondRowTds.length === 1) {
     check(
@@ -38,97 +40,11 @@ const tableIsEmpty = (html: Document) => {
   return false;
 };
 
-export const getEnrolledCourses = async (): Promise<CourseMeta[]> => {
-  const response = await fetch200(
-    buildURL("/home.php", {
-      f: "allcourse",
-    })
-  );
-  const body = await response.text();
-  const html = parse(body);
-
-  const result: CourseMeta[] = [];
-
-  for (const a of $x<Element>('.//td[@class="listTD"]/a', html)) {
-    const bs = $x<Element>("b", a);
-    let is_admin = false;
-    let tag: Element;
-    if (bs.length > 0) {
-      is_admin = true;
-      [tag] = bs;
-    } else {
-      tag = a;
-    }
-
-    const name = notnull(tag.textContent);
-    const serial = notnull(
-      a.parentElement!.parentElement!.childNodes[1].textContent
-    );
-
-    const courseURL = notnull(a.getAttribute("href"));
-    const m = courseURL.match(new RegExp("/course/(\\d+)"));
-    if (m === null) {
-      throw Bug(`invalid course URL ${courseURL}`);
-    }
-    result.push({
-      id: parseInt(m[1]),
-      serial: serial,
-      name: name,
-      is_admin: is_admin,
-      children: [],
-    });
-  }
-  return result;
-};
-
-export const getCourse = async (course_id: number): Promise<CourseMeta> => {
-  const response = await fetch200(
-    buildURL("/course.php", {
-      f: "syllabus",
-      courseID: course_id.toFixed(),
-    })
-  );
-  const responseURL = new URL(response.url);
-  if (responseURL.pathname === "/course_login.php") {
-    throw error403(`No access to course: course_id=${course_id}`);
-  }
-
-  const body = await response.text();
-  if (body.trim().length === 0) {
-    throw error403(
-      `Empty response returend from course, the course probably doesn't exist: course_id=${course_id}`
-    );
-  }
-
-  const html = parse(body);
-  const name = $x1<Text>('//div[@class="infoPath"]/a/text()', html).nodeValue!;
-
-  const hint = notnull(
-    $x1<Text>(
-      '//div[@class="infoTable"]//td[2]/span[@class="hint"]/text()',
-      html
-    ).nodeValue
-  );
-  const m = hint.match(
-    new RegExp(`\\([^,()]+, ([^,()]+), [^,()]+, [^,()]+\\)`)
-  );
-  if (!m) {
-    throw new Bug(hint || "hint is null");
-  }
-  const serial = m[1];
-
-  const is_admin =
-    $x('//div[@id="main"]//a[@href="javascript:editDoc(1)"]', html).length > 0;
-
-  return {
-    id: course_id,
-    serial: serial,
-    name: name,
-    is_admin: is_admin,
-  };
-};
-
-async function* flattenPaginator(courseMeta: CourseMeta, f: string, page = 1) {
+export async function* flattenPaginator(
+  courseMeta: CourseMeta,
+  f: string,
+  page = 1
+) {
   while (true) {
     const response = await fetch200(
       buildURL("/course.php", {
@@ -157,19 +73,3 @@ async function* flattenPaginator(courseMeta: CourseMeta, f: string, page = 1) {
     console.assert(page === next_page);
   }
 }
-
-export const getCourseAnnouncements = async (courseMeta: CourseMeta) => {
-  const result: AnnouncementMeta[] = [];
-  for await (const html of flattenPaginator(courseMeta, "news")) {
-    for (const tr of $x('//*[@id="main"]//tr[@class!="header"]', html)) {
-      const href = $x1<Attr>("td[1]/a/@href", tr);
-      const title = $x1<Text>("td[2]//a/text()", tr);
-      result.push({
-        id: mustParseInt(mustGetQs(href.value, "newsID")),
-        title: notnull(title.textContent),
-        course: `Course-${courseMeta.id}`,
-      });
-    }
-  }
-  return result;
-};

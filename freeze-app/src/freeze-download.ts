@@ -2,7 +2,7 @@ import { RouterLocation } from "@vaadin/router";
 import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { BaseView } from "./base-view.js";
-import { getCourse, getEnrolledCourses } from "./crawler/crawler.js";
+import { getCourse, getEnrolledCourses } from "./crawler/course";
 import { FileSystemDataSource } from "./data-source.js";
 import { RenderableError } from "./errors.js";
 
