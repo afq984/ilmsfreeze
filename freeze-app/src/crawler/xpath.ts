@@ -1,4 +1,4 @@
-import { check } from "./utils";
+import { check } from "../utils";
 
 export const $x = <T extends Node>(
   xpathExpression: string,

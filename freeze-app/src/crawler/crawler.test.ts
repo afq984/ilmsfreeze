@@ -1,6 +1,6 @@
 import { assert } from "@open-wc/testing";
 import { getCourse, getCourseAnnouncements } from "./crawler";
-import { RenderableError } from "./errors";
+import { RenderableError } from "../errors";
 import * as td from "./testdata";
 
 const capture = async <T>(promise: Promise<T>) => {

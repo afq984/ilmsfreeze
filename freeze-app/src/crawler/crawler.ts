@@ -1,7 +1,7 @@
-import { error403 } from "./errors";
-import { AnnouncementMeta, CourseMeta } from "./types";
+import { error403 } from "../errors";
+import { AnnouncementMeta, CourseMeta } from "../types";
 import { $x, $x1 } from "./xpath";
-import { Bug, check, mustParseInt, notnull } from "./utils";
+import { Bug, check, mustParseInt, notnull } from "../utils";
 
 const fetch200 = async (url: RequestInfo) => {
   const response = await fetch(url);
@@ -12,9 +12,37 @@ const fetch200 = async (url: RequestInfo) => {
 export const parse = (body: string) =>
   new DOMParser().parseFromString(body, "text/html");
 
+const mustGetQs = (href: string, q: string) => {
+  const url = new URL(href, "https://example.com");
+  const value = url.searchParams.get(q);
+  if (value === null) {
+    throw Bug;
+  }
+  return value;
+};
+
+const buildURL = (path: string, query: Record<string, string>): string => {
+  const url = new URL(path, "https://lms.nthu.edu.tw");
+  url.search = new URLSearchParams(query).toString();
+  return url.toString();
+};
+
+const tableIsEmpty = (html: Document) => {
+  const secondRowTds = $x('//div[@class="tableBox"]/table//tr[2]/td', html);
+  if (secondRowTds.length === 1) {
+    check(
+      ["目前尚無資料", "No Data"].includes(notnull(secondRowTds[0].textContent))
+    );
+    return true;
+  }
+  return false;
+};
+
 export const getEnrolledCourses = async (): Promise<CourseMeta[]> => {
   const response = await fetch200(
-    "https://lms.nthu.edu.tw/home.php?f=allcourse"
+    buildURL("/home.php", {
+      f: "allcourse",
+    })
   );
   const body = await response.text();
   const html = parse(body);
@@ -54,10 +82,12 @@ export const getEnrolledCourses = async (): Promise<CourseMeta[]> => {
 };
 
 export const getCourse = async (course_id: number): Promise<CourseMeta> => {
-  const url = new URL("https://lms.nthu.edu.tw/course.php");
-  url.searchParams.set("f", "syllabus");
-  url.searchParams.set("courseID", course_id.toString());
-  const response = await fetch200(url.toString());
+  const response = await fetch200(
+    buildURL("/course.php", {
+      f: "syllabus",
+      courseID: course_id.toFixed(),
+    })
+  );
   const responseURL = new URL(response.url);
   if (responseURL.pathname === "/course_login.php") {
     throw error403(`No access to course: course_id=${course_id}`);
@@ -98,36 +128,10 @@ export const getCourse = async (course_id: number): Promise<CourseMeta> => {
   };
 };
 
-const tableIsEmpty = (html: Document) => {
-  const secondRowTds = $x('//div[@class="tableBox"]/table//tr[2]/td', html);
-  if (secondRowTds.length === 1) {
-    check(
-      ["目前尚無資料", "No Data"].includes(notnull(secondRowTds[0].textContent))
-    );
-    return true;
-  }
-  return false;
-};
-
-const mustGetQs = (href: string, q: string) => {
-  const url = new URL(href, "https://example.com");
-  const value = url.searchParams.get(q);
-  if (value === null) {
-    throw Bug;
-  }
-  return value;
-};
-
-const buildURL = (path: string, query: Record<string, string>): string => {
-  const url = new URL(path);
-  url.search = new URLSearchParams(query).toString();
-  return url.toString();
-};
-
 async function* flattenPaginator(courseMeta: CourseMeta, f: string, page = 1) {
   while (true) {
     const response = await fetch200(
-      buildURL("https://lms.nthu.edu.tw/course.php", {
+      buildURL("/course.php", {
         courseID: courseMeta.id.toFixed(),
         f: f,
         page: page.toFixed(),

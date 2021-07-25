@@ -8,7 +8,7 @@ import {
   MaterialMeta,
   SubmissionMeta,
   VideoMeta,
-} from "./types";
+} from "../types";
 
 export const COURSE_74: CourseMeta = {
   id: 74,
