@@ -6,8 +6,8 @@ export const check = (condition: boolean, ...message: any) => {
   }
 };
 
-export const notnull = <T>(value: T | null): T => {
-  if (value === null) {
+export const notnull = <T>(value: T | null | undefined): T => {
+  if (value === null || value === undefined) {
     throw new Bug();
   }
   return value;
