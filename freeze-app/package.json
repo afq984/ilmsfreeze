@@ -15,7 +15,9 @@
     "format": "prettier \"**/*.{js,mjs,ts}\" --ignore-path .gitignore --write",
     "format:check": "prettier \"**/*.{js,mjs,ts}\" --ignore-path .gitignore --check",
     "deploy-to-gh-pages": "cd out/dist && echo ilmsfreeze.afq984.org > CNAME && git init -b gh-pages && git add . && git commit -m \"npm run deploy-to-gh-pages\" && git push --force git@github.com:afq984/ilmsfreeze gh-pages",
-    "test": "npm run build:tsc && web-test-runner out/tsc/**/*.test.js"
+    "test": "npm run test:ilmsmock",
+    "test:live": "npm run build:tsc && web-test-runner",
+    "test:ilmsmock": "npm run build:tsc && GOBIN=`npm bin` go install github.com/afq984/ilmsmock/cmd/ilmsmock@latest && ilmsmock --setenv=ILMS_ORIGIN -- web-test-runner"
   },
   "devDependencies": {
     "@open-wc/testing": "^2.5.33",
