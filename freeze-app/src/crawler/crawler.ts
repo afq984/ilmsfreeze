@@ -1,6 +1,21 @@
-import { CourseMeta } from "../types";
+import { AnyMeta, CourseMeta, Typename } from "../types";
 import { Bug, check, mustParseInt, notnull } from "../utils";
 import { $x } from "./xpath";
+
+export type SaveFileContent = string | ReadableStream<Uint8Array>;
+export type SaveFiles = Record<string, SaveFileContent>;
+export type Downloadable = {
+  typename: Typename;
+  meta: AnyMeta;
+};
+export type CrawlResult = AsyncGenerator<Downloadable, SaveFiles>;
+
+export const dl = (typename: Typename, meta: AnyMeta): Downloadable => {
+  return {
+    typename: typename,
+    meta: meta,
+  };
+};
 
 export const fetch200 = async (url: RequestInfo) => {
   const response = await fetch(url);

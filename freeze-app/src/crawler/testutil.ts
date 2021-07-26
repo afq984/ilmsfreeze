@@ -10,10 +10,21 @@ export const capture = async <T>(promise: Promise<T>) => {
   return () => result;
 };
 
-export const gather = async <T>(ag: AsyncGenerator<T>): Promise<T[]> => {
-  const result: T[] = [];
-  for await (const item of ag) {
-    result.push(item);
+export const gather = async <Yield, Return>(
+  ag: AsyncGenerator<Yield, Return>
+): Promise<[Yield[], Return]> => {
+  const items: Yield[] = [];
+  for (;;) {
+    const { value, done } = await ag.next();
+    if (done) {
+      return [items, value as Return];
+    }
+    items.push(value as Yield);
   }
-  return result;
+};
+
+export const readall = async (
+  stream: ReadableStream<Uint8Array>
+): Promise<string> => {
+  return await new Response(stream).text();
 };

@@ -77,3 +77,25 @@ export interface VideoMeta {
   id: number;
   url: string;
 }
+
+export type Typename =
+  | "course"
+  | "announcement"
+  | "material"
+  | "discussion"
+  | "homework"
+  | "submission"
+  | "attachment"
+  | "grouplist"
+  | "video";
+
+export type AnyMeta =
+  | CourseMeta
+  | AnnouncementMeta
+  | MaterialMeta
+  | DiscussionMeta
+  | HomeworkMeta
+  | SubmissionMeta
+  | AttachmentMeta
+  | GroupListMeta
+  | VideoMeta;

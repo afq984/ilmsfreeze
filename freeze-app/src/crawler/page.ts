@@ -1,6 +1,7 @@
+import { replaceIllegalCharactersInPath } from "./fileutil";
 import { AnnouncementMeta, AttachmentMeta } from "../types";
 import { check, mustParseInt, notnull } from "../utils";
-import { buildURL, fetch200, mustGetQs, parse } from "./crawler";
+import { buildURL, CrawlResult, fetch200, mustGetQs, parse } from "./crawler";
 import { $x } from "./xpath";
 
 export function* getAttachments(
@@ -29,7 +30,10 @@ export function* getAttachments(
   }
 }
 
-export async function* processAnnouncement(announcementMeta: AnnouncementMeta) {
+// TODO: return correct type
+export async function* processAnnouncement(
+  announcementMeta: AnnouncementMeta
+): CrawlResult {
   const response = await fetch200(
     buildURL("/home/http_event_select.php", {
       id: announcementMeta.id.toFixed(),
@@ -47,11 +51,43 @@ export async function* processAnnouncement(announcementMeta: AnnouncementMeta) {
       `Announcement-${announcementMeta.id}`,
       parse(attachmentRawDiv)
     )) {
-      yield attachment;
+      yield {
+        typename: "attachment",
+        meta: attachment,
+      };
     }
   }
 
   return {
     "index.json": JSON.stringify(json),
+  };
+}
+
+function suggestAttachmentFilename(dirty: string) {
+  if (dirty === "meta.json") {
+    return "meta_.json";
+  }
+  return replaceIllegalCharactersInPath(dirty, "_");
+}
+
+export async function* processAttachment(
+  attachmentMeta: AttachmentMeta
+): CrawlResult {
+  const respose = await fetch200(
+    buildURL("/sys/read_attach.php", {
+      id: attachmentMeta.id.toFixed(),
+    })
+  );
+
+  const saveName = suggestAttachmentFilename(attachmentMeta.title);
+  const metaString = JSON.stringify({
+    ...attachmentMeta,
+    children: [],
+    saved_filename: saveName,
+  });
+
+  return {
+    "meta.json": metaString,
+    [saveName]: notnull(respose.body),
   };
 }
