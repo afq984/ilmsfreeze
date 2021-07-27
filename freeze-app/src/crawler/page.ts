@@ -1,8 +1,43 @@
+import { error403 } from "./../errors";
+import { MaterialMeta, VideoMeta } from "./../types";
 import { replaceIllegalCharactersInPath } from "./fileutil";
 import { AnnouncementMeta, AttachmentMeta } from "../types";
 import { check, mustParseInt, notnull } from "../utils";
-import { buildURL, CrawlResult, fetch200, mustGetQs, parse } from "./crawler";
-import { $x } from "./xpath";
+import {
+  buildURL,
+  CrawlResult,
+  dl,
+  fetch200,
+  mustGetQs,
+  parseHTML,
+  parseDownloadableReference,
+} from "./crawler";
+import { $x, $x1 } from "./xpath";
+
+const checkPermission = (html: Document) => {
+  const noPermission = $x(
+    `//div[contains(@style, "color:#F00;") and ` +
+      `(starts-with(text(), "權限不足!") or starts-with(text(), "No Permission!"))]` +
+      `/text()`,
+    html
+  );
+  if (noPermission.length > 0) {
+    throw error403(noPermission.join(" "));
+  }
+};
+
+const htmlGetMain = (html: Document) => {
+  checkPermission(html);
+  const mains = $x<Element>('//div[@id="main"]', html);
+  check(mains.length > 0);
+  const [main] = mains;
+  for (const bad of ['.//div[@class="infoPath"]', ".//script"]) {
+    for (const toRemove of $x<Element>(bad, main)) {
+      toRemove.parentElement?.removeChild(toRemove);
+    }
+  }
+  return main;
+};
 
 export function* getAttachments(
   parent: string,
@@ -48,10 +83,10 @@ export async function* processAnnouncement(
   if (attachmentRawDiv !== null) {
     for (const attachment of getAttachments(
       `Announcement-${announcementMeta.id}`,
-      parse(attachmentRawDiv)
+      parseHTML(attachmentRawDiv)
     )) {
       yield {
-        typename: "attachment",
+        typename: "Attachment",
         meta: attachment,
       };
     }
@@ -59,6 +94,60 @@ export async function* processAnnouncement(
 
   return {
     "index.json": JSON.stringify(json),
+  };
+}
+
+export const getMaterialVideo = async (
+  materialMeta: MaterialMeta,
+  baseURL: string
+): Promise<VideoMeta | null> => {
+  const response = await fetch200(
+    buildURL("/sys/http_get_media.php", {
+      id: materialMeta.id.toFixed(),
+      db_table: "content",
+      flash_installed: "false",
+      swf_id: `swfslide${materialMeta.id}`,
+      area_size: "724x3",
+    })
+  );
+  const json = notnull(await response.json());
+  check(json.ret.status === "true", materialMeta.id);
+  if (json.ret.player_width === null) {
+    return null;
+  }
+
+  const html = parseHTML(json.ret.embed);
+  const src = $x1<Attr>("//video/@src", html).value;
+  return { id: materialMeta.id, url: new URL(src, baseURL).toString() };
+};
+
+export async function* processMaterial(
+  materialMeta: MaterialMeta
+): CrawlResult {
+  const response = await fetch200(
+    buildURL("/course.php", {
+      courseID: parseDownloadableReference(materialMeta.course).id.toFixed(),
+      f: "doc",
+      cid: materialMeta.id.toFixed(),
+    })
+  );
+  const html = parseHTML(await response.text());
+  const main = htmlGetMain(html);
+  const refString = `Material-${materialMeta.id}`;
+
+  for (const attachment of getAttachments(refString, main)) {
+    yield dl("Attachment", attachment);
+  }
+
+  if (materialMeta.type === "Epowercam") {
+    const video = await getMaterialVideo(materialMeta, response.url);
+    if (video !== null) {
+      yield dl("Video", video);
+    }
+  }
+
+  return {
+    "index.html": main.outerHTML,
   };
 }
 

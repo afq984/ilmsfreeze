@@ -1,3 +1,4 @@
+import { isTypename } from "./../types";
 import { AnyMeta, CourseMeta, Typename } from "../types";
 import { Bug, check, mustParseInt, notnull } from "../utils";
 import { $x } from "./xpath";
@@ -8,6 +9,10 @@ export type Downloadable = {
   typename: Typename;
   meta: AnyMeta;
 };
+export type DownloadableReference = {
+  typename: Typename;
+  id: number;
+};
 export type CrawlResult = AsyncGenerator<Downloadable, SaveFiles>;
 
 export const dl = (typename: Typename, meta: AnyMeta): Downloadable => {
@@ -17,13 +22,24 @@ export const dl = (typename: Typename, meta: AnyMeta): Downloadable => {
   };
 };
 
+// parse "course-1" into {typename: "course", id: 1}
+export const parseDownloadableReference = (
+  s: string
+): DownloadableReference => {
+  const [typename, idstr] = s.split("-", 2);
+  if (!isTypename(typename)) {
+    throw Bug(`${typename} is not a Typename`);
+  }
+  return { typename, id: mustParseInt(idstr) };
+};
+
 export const fetch200 = async (url: RequestInfo) => {
   const response = await fetch(url);
-  console.assert(response.ok, response.status);
+  check(response.ok, response.status);
   return response;
 };
 
-export const parse = (body: string) =>
+export const parseHTML = (body: string) =>
   new DOMParser().parseFromString(body, "text/html");
 
 export const mustGetQs = (href: string, q: string) => {
@@ -68,7 +84,7 @@ export async function* flattenPaginator(
         page: page.toFixed(),
       })
     );
-    const html = parse(await response.text());
+    const html = parseHTML(await response.text());
 
     if (tableIsEmpty(html)) {
       break;

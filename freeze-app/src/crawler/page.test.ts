@@ -1,12 +1,20 @@
 import { notnull } from "./../utils";
 import { assert } from "@open-wc/testing";
 import { dl } from "./crawler";
-import { processAnnouncement, processAttachment } from "./page";
+import {
+  processAnnouncement,
+  processAttachment,
+  processMaterial,
+} from "./page";
 import {
   ANNOUNCEMENT_2218728,
+  ATTACHMENT_2107249,
   ATTACHMENT_2616319,
   ATTACHMENT_2616320,
   ATTACHMENT_2616322,
+  MATERIAL_1518,
+  MATERIAL_2173495,
+  VIDEO_1518,
 } from "./testdata";
 import { capture, gather, readall } from "./testutil";
 
@@ -19,9 +27,9 @@ suite("announcement", () => {
     assert.containsAllKeys(saves, ["index.json"]);
 
     assert.deepEqual(attachments, [
-      dl("attachment", ATTACHMENT_2616319),
-      dl("attachment", ATTACHMENT_2616320),
-      dl("attachment", ATTACHMENT_2616322),
+      dl("Attachment", ATTACHMENT_2616319),
+      dl("Attachment", ATTACHMENT_2616320),
+      dl("Attachment", ATTACHMENT_2616322),
     ]);
   });
 
@@ -97,5 +105,38 @@ suite("attachment", () => {
 
     const meta = notnull(JSON.parse(saves["meta.json"] as string));
     assert.equal(meta.saved_filename, "_._.txt");
+  });
+});
+
+suite("material", () => {
+  test("process", async () => {
+    const [children, saves] = await gather(processMaterial(MATERIAL_2173495));
+
+    assert.hasAllKeys(saves, ["index.html"]);
+
+    assert.deepEqual(children, [dl("Attachment", ATTACHMENT_2107249)]);
+  });
+
+  test("process powercam", async () => {
+    const [children, saves] = await gather(processMaterial(MATERIAL_1518));
+
+    assert.hasAllKeys(saves, ["index.html"]);
+
+    assert.deepEqual(children, [dl("Video", VIDEO_1518)]);
+  });
+
+  test("invalid", async () => {
+    assert.throw(
+      await capture(
+        gather(
+          processMaterial({
+            id: 0,
+            title: "invalid material",
+            type: "Econtent",
+            course: "Course-74",
+          })
+        )
+      )
+    );
   });
 });

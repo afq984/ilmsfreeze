@@ -1,7 +1,7 @@
 import { assert } from "@open-wc/testing";
 
 import { $x, $x1 } from "./xpath";
-import { parse } from "./crawler";
+import { parseHTML } from "./crawler";
 
 const body = `<ul>
   <li><a href="/a">a</a></li>
@@ -9,7 +9,7 @@ const body = `<ul>
   <li class="last"><a href="/c">c</a></li>
 </ul>`;
 
-const html = parse(body);
+const html = parseHTML(body);
 
 suite("xpath", () => {
   test("xpath", () => {

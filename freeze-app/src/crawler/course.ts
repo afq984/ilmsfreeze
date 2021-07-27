@@ -6,7 +6,7 @@ import {
   fetch200,
   flattenPaginator,
   mustGetQs,
-  parse,
+  parseHTML,
 } from "./crawler";
 import { $x, $x1 } from "./xpath";
 
@@ -17,7 +17,7 @@ export const getEnrolledCourses = async (): Promise<CourseMeta[]> => {
     })
   );
   const body = await response.text();
-  const html = parse(body);
+  const html = parseHTML(body);
 
   const result: CourseMeta[] = [];
 
@@ -72,7 +72,7 @@ export const getCourse = async (course_id: number): Promise<CourseMeta> => {
     );
   }
 
-  const html = parse(body);
+  const html = parseHTML(body);
   const name = $x1<Text>('//div[@class="infoPath"]/a/text()', html).nodeValue!;
 
   const hint = notnull(

@@ -79,15 +79,29 @@ export interface VideoMeta {
 }
 
 export type Typename =
-  | "course"
-  | "announcement"
-  | "material"
-  | "discussion"
-  | "homework"
-  | "submission"
-  | "attachment"
-  | "grouplist"
-  | "video";
+  | "Course"
+  | "Announcement"
+  | "Material"
+  | "Discussion"
+  | "Homework"
+  | "Submission"
+  | "Attachment"
+  | "Grouplist"
+  | "Video";
+
+export const isTypename = (s: string): s is Typename => {
+  return [
+    "Course",
+    "Announcement",
+    "Material",
+    "Discussion",
+    "Homework",
+    "Submission",
+    "Attachment",
+    "Grouplist",
+    "Video",
+  ].includes(s);
+};
 
 export type AnyMeta =
   | CourseMeta
