@@ -1,7 +1,7 @@
 import { assert } from "@open-wc/testing";
 import { notnull } from "../utils";
-import { processAttachment } from "./file";
-import { ATTACHMENT_2616319, ATTACHMENT_2616322 } from "./testdata";
+import { processAttachment, processVideo } from "./file";
+import { ATTACHMENT_2616319, ATTACHMENT_2616322, VIDEO_1518 } from "./testdata";
 import { gather, readall } from "./testutil";
 
 const ATTACHMENT_2616319_CONTENT = `HW3 成績已公佈
@@ -61,5 +61,28 @@ suite("attachment", () => {
 
     const meta = notnull(JSON.parse(saves["meta.json"] as string));
     assert.equal(meta.saved_filename, "_._.txt");
+  });
+});
+
+const hexDigest = (digest: ArrayBuffer): string =>
+  Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+suite("video", () => {
+  test("process", async () => {
+    const [children, saves] = await gather(processVideo(VIDEO_1518));
+
+    assert.isEmpty(children);
+    assert.containsAllKeys(saves, ["video.mp4"]);
+
+    const digest = await crypto.subtle.digest(
+      "SHA-256",
+      await new Response(saves["video.mp4"] as ReadableStream).arrayBuffer()
+    );
+    assert.equal(
+      hexDigest(digest),
+      "c926d4375794d4a1b56cf5bc0f323dda10d45fbd3e93f2779b4f8af86f2d970d"
+    );
   });
 });

@@ -1,4 +1,4 @@
-import { AttachmentMeta } from "../types";
+import { AttachmentMeta, VideoMeta } from "../types";
 import { notnull } from "../utils";
 import { buildURL, CrawlResult, fetch200 } from "./crawler";
 import { replaceIllegalCharactersInPath } from "./fileutil";
@@ -30,4 +30,9 @@ export async function* processAttachment(
     "meta.json": metaString,
     [saveName]: notnull(respose.body),
   };
+}
+
+export async function* processVideo(videoMeta: VideoMeta): CrawlResult {
+  const response = await fetch200(videoMeta.url);
+  return { "video.mp4": notnull(response.body) };
 }
