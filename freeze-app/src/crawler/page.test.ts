@@ -12,11 +12,11 @@ import { capture, gather, readall } from "./testutil";
 
 suite("announcement", () => {
   test("process", async () => {
-    const [attachments] = await gather(
+    const [attachments, saves] = await gather(
       processAnnouncement(ANNOUNCEMENT_2218728)
     );
 
-    // TODO: the announcement itself
+    assert.containsAllKeys(saves, ["index.json"]);
 
     assert.deepEqual(attachments, [
       dl("attachment", ATTACHMENT_2616319),

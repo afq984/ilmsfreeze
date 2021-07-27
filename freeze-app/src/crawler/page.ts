@@ -30,7 +30,6 @@ export function* getAttachments(
   }
 }
 
-// TODO: return correct type
 export async function* processAnnouncement(
   announcementMeta: AnnouncementMeta
 ): CrawlResult {
