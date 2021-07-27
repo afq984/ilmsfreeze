@@ -1,6 +1,5 @@
 import { error403 } from "./../errors";
 import { MaterialMeta, VideoMeta } from "./../types";
-import { replaceIllegalCharactersInPath } from "./fileutil";
 import { AnnouncementMeta, AttachmentMeta } from "../types";
 import { check, mustParseInt, notnull } from "../utils";
 import {
@@ -148,34 +147,5 @@ export async function* processMaterial(
 
   return {
     "index.html": main.outerHTML,
-  };
-}
-
-function suggestAttachmentFilename(dirty: string) {
-  if (dirty === "meta.json") {
-    return "meta_.json";
-  }
-  return replaceIllegalCharactersInPath(dirty, "_");
-}
-
-export async function* processAttachment(
-  attachmentMeta: AttachmentMeta
-): CrawlResult {
-  const respose = await fetch200(
-    buildURL("/sys/read_attach.php", {
-      id: attachmentMeta.id.toFixed(),
-    })
-  );
-
-  const saveName = suggestAttachmentFilename(attachmentMeta.title);
-  const metaString = JSON.stringify({
-    ...attachmentMeta,
-    children: [],
-    saved_filename: saveName,
-  });
-
-  return {
-    "meta.json": metaString,
-    [saveName]: notnull(respose.body),
   };
 }
