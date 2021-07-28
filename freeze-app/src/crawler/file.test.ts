@@ -45,7 +45,7 @@ suite("attachment", () => {
     );
 
     assert.isEmpty(children);
-    assert.containsAllKeys(saves, ["meta.json", "meta_.json"]);
+    assert.hasAllKeys(saves, ["meta.json", "meta_.json"]);
 
     const meta = notnull(JSON.parse(saves["meta.json"] as string));
     assert.equal(meta.saved_filename, "meta_.json");
@@ -57,7 +57,7 @@ suite("attachment", () => {
     );
 
     assert.isEmpty(children);
-    assert.containsAllKeys(saves, ["meta.json", "_._.txt"]);
+    assert.hasAllKeys(saves, ["meta.json", "_._.txt"]);
 
     const meta = notnull(JSON.parse(saves["meta.json"] as string));
     assert.equal(meta.saved_filename, "_._.txt");
@@ -74,7 +74,7 @@ suite("video", () => {
     const [children, saves] = await gather(processVideo(VIDEO_1518));
 
     assert.isEmpty(children);
-    assert.containsAllKeys(saves, ["video.mp4"]);
+    assert.hasAllKeys(saves, ["video.mp4"]);
 
     const digest = await crypto.subtle.digest(
       "SHA-256",

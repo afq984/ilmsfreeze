@@ -1,5 +1,10 @@
 import { error403 } from "./../errors";
-import { DiscussionMeta, MaterialMeta, VideoMeta } from "./../types";
+import {
+  DiscussionMeta,
+  HomeworkMeta,
+  MaterialMeta,
+  VideoMeta,
+} from "./../types";
 import { AnnouncementMeta, AttachmentMeta } from "../types";
 import { check, mustParseInt, notnull } from "../utils";
 import {
@@ -10,6 +15,8 @@ import {
   mustGetQs,
   parseHTML,
   parseDownloadableReference,
+  SaveFiles,
+  tableIsEmpty,
 } from "./crawler";
 import { $x, $x1 } from "./xpath";
 
@@ -173,4 +180,108 @@ export async function* processDiscussion(
   return {
     "index.json": JSON.stringify(json),
   };
+}
+
+export async function* processHomework(
+  homeworkMeta: HomeworkMeta
+): CrawlResult {
+  const refString = `Homework-${homeworkMeta.id}`;
+  const saveFiles: SaveFiles = {};
+
+  // Homework page
+  {
+    const response = await fetch200(
+      buildURL("/course.php", {
+        courseID: parseDownloadableReference(homeworkMeta.course).id.toFixed(),
+        f: "hw",
+        hw: homeworkMeta.id.toFixed(),
+      })
+    );
+    const html = parseHTML(await response.text());
+    const main = htmlGetMain(html);
+
+    for (const toRemove of $x('.//span[@class="toolWrapper"]', main)) {
+      toRemove.parentElement!.removeChild(toRemove);
+    }
+
+    for (const attachment of getAttachments(refString, main)) {
+      yield dl("Attachment", attachment);
+    }
+
+    saveFiles["index.html"] = main.outerHTML;
+  }
+
+  // Submissions
+  {
+    const response = await fetch200(
+      buildURL("/course.php", {
+        courseID: parseDownloadableReference(homeworkMeta.course).id.toFixed(),
+        f: "hw_doclist",
+        hw: homeworkMeta.id.toFixed(),
+      })
+    );
+    const html = parseHTML(await response.text());
+    const main = htmlGetMain(html);
+
+    if (tableIsEmpty(main)) {
+      return saveFiles;
+    }
+
+    const headerTr = $x1<Element>(
+      './/div[@class="tableBox"]//tr[@class="header"]',
+      main
+    );
+    const fieldIndexes: Record<string, number> = {};
+    headerTr.childNodes.forEach((td, i) => {
+      const as = $x<Element>("a", td);
+      if (as.length === 1) {
+        fieldIndexes[mustGetQs(notnull(as[0].getAttribute("href")), "order")] =
+          i;
+      }
+    });
+
+    const ititle = notnull(fieldIndexes.title);
+    const iname = notnull(fieldIndexes.name);
+    check(iname > ititle, iname);
+
+    for (const tr of $x<Element>(
+      '//div[@class="tableBox"]//tr[@class!="header"]',
+      main
+    )) {
+      const as = $x<Element>("div/a", tr.childNodes[ititle]);
+      if (as.length === 0) {
+        continue;
+      }
+      check(as.length === 1);
+      const id = mustParseInt(
+        mustGetQs(notnull(as[0].getAttribute("href")), "cid")
+      );
+      const title = notnull(as[0].textContent).trim();
+
+      const comments = $x<Attr>(
+        'div/img[@src="/sys/res/icon/hw_comment.png"]/@title',
+        tr.childNodes[ititle]
+      );
+      check(comments.length < 2);
+      const comment = comments.length > 0 ? comments[0].value : null;
+
+      // Group homework may hide behind a <a>
+      const by = $x1<Text>(
+        "div/text()|div/a/text()",
+        tr.childNodes[iname]
+      ).data;
+
+      yield dl("Submission", {
+        id: id,
+        title: title,
+        by: by,
+        comment: comment,
+        course: homeworkMeta.course,
+      });
+    }
+
+    saveFiles["list.html"] = main.outerHTML;
+  }
+
+  return saveFiles;
 }

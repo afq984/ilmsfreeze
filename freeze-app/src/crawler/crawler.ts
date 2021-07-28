@@ -60,7 +60,7 @@ export const buildURL = (
   return url.toString();
 };
 
-export const tableIsEmpty = (html: Document) => {
+export const tableIsEmpty = (html: Node) => {
   const secondRowTds = $x('//div[@class="tableBox"]/table//tr[2]/td', html);
   if (secondRowTds.length === 1) {
     check(
