@@ -6,6 +6,7 @@ import {
   getCourseDiscussions,
   getCourseHomeworks,
   getCourseMaterials,
+  getCourseScores,
 } from "./course";
 import { capture, gather } from "./testutil";
 import * as td from "./testdata";
@@ -100,5 +101,10 @@ suite("getCourse*", () => {
     const [homeworks] = await gather(getCourseHomeworks(td.COURSE_1808));
 
     assert.deepEqual(homeworks, []);
+  });
+
+  test("ScoresEmpty", async () => {
+    const [scores] = await gather(getCourseScores(td.COURSE_74));
+    assert.deepEqual(scores, []);
   });
 });

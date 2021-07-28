@@ -5,6 +5,7 @@ import {
   DiscussionMeta,
   HomeworkMeta,
   MaterialMeta,
+  ScoreMeta,
 } from "../types";
 import { Bug, mustParseInt, notnull } from "../utils";
 import {
@@ -190,5 +191,26 @@ export async function* getCourseHomeworks(
         course: `Course-${courseMeta.id}`,
       };
     }
+  }
+}
+
+export async function* getCourseScores(
+  courseMeta: CourseMeta
+): AsyncGenerator<ScoreMeta> {
+  const response = await fetch200(
+    buildURL("/course.php", {
+      f: "score",
+      courseID: courseMeta.id.toFixed(),
+    })
+  );
+  const html = parseHTML(await response.text());
+
+  if (
+    $x(
+      '//div[@id="main"]//input[@type="button" and @onclick="history.back()"]',
+      html
+    ).length === 0
+  ) {
+    yield { course: `Course-${courseMeta.id}` };
   }
 }
