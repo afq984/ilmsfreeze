@@ -5,6 +5,7 @@ import {
   processDiscussion,
   processHomework,
   processMaterial,
+  processSubmission,
 } from "./page";
 import {
   ANNOUNCEMENT_2218728,
@@ -14,9 +15,11 @@ import {
   ATTACHMENT_2107249,
   ATTACHMENT_2134734,
   ATTACHMENT_2134738,
+  ATTACHMENT_2406879,
   ATTACHMENT_2616319,
   ATTACHMENT_2616320,
   ATTACHMENT_2616322,
+  ATTACHMENT_49113,
   DISCUSSION_258543,
   HOMEWORK_182409,
   HOMEWORK_18264,
@@ -183,5 +186,23 @@ suite("homework", () => {
     const [children] = await gather(processHomework(HOMEWORK_32460));
 
     assert.deepEqual(children, [dl("Attachment", ATTACHMENT_133807)]);
+  });
+});
+
+suite("submission", () => {
+  test("process", async () => {
+    const [children, saves] = await gather(
+      processSubmission(SUBMITTED_2474481)
+    );
+
+    assert.deepEqual(children, [dl("Attachment", ATTACHMENT_2406879)]);
+    assert.hasAllKeys(saves, ["index.html"]);
+  });
+
+  test("group download", async () => {
+    const [children, saves] = await gather(processSubmission(SUBMISSION_59376));
+
+    assert.deepEqual(children, [dl("Attachment", ATTACHMENT_49113)]);
+    assert.hasAllKeys(saves, ["index.html"]);
   });
 });

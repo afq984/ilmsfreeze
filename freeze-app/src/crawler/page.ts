@@ -3,6 +3,7 @@ import {
   DiscussionMeta,
   HomeworkMeta,
   MaterialMeta,
+  SubmissionMeta,
   VideoMeta,
 } from "./../types";
 import { AnnouncementMeta, AttachmentMeta } from "../types";
@@ -284,4 +285,29 @@ export async function* processHomework(
   }
 
   return saveFiles;
+}
+
+export async function* processSubmission(
+  submissionMeta: SubmissionMeta
+): CrawlResult {
+  const response = await fetch200(
+    buildURL("/course.php", {
+      courseID: parseDownloadableReference(submissionMeta.course).id.toFixed(),
+      f: "doc",
+      cid: submissionMeta.id.toFixed(),
+    })
+  );
+  const html = parseHTML(await response.text());
+  const main = htmlGetMain(html);
+
+  for (const attachment of getAttachments(
+    `Submission-${submissionMeta.id}`,
+    main
+  )) {
+    yield dl("Attachment", attachment);
+  }
+
+  return {
+    "index.html": main.outerHTML,
+  };
 }
