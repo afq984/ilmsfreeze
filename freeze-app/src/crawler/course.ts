@@ -1,5 +1,10 @@
 import { error403 } from "../errors";
-import { AnnouncementMeta, CourseMeta, MaterialMeta } from "../types";
+import {
+  AnnouncementMeta,
+  CourseMeta,
+  DiscussionMeta,
+  MaterialMeta,
+} from "../types";
 import { Bug, mustParseInt, notnull } from "../utils";
 import {
   buildURL,
@@ -116,6 +121,30 @@ export async function* getCourseAnnouncements(
   }
 }
 
+export async function* getCourseDiscussions(
+  courseMeta: CourseMeta
+): AsyncGenerator<DiscussionMeta> {
+  for await (const html of flattenPaginator(courseMeta, "forumlist")) {
+    for (const tr of $x<Element>(
+      '//*[@id="main"]//tr[@class!="header"]',
+      html
+    )) {
+      if ($x('.//img[@class="vmiddle"]', tr).length > 0) {
+        // XXX: belongs to a homework, material
+        // don't know if it is accessible
+        continue;
+      }
+      const href = $x1<Attr>("td[1]/a/@href", tr);
+      const title = $x1<Text>("td[2]//a/span/text()", tr);
+      yield {
+        id: mustParseInt(mustGetQs(href.value, "tid")),
+        title: title.data,
+        course: `Course-${courseMeta.id}`,
+      };
+    }
+  }
+}
+
 export async function* getCourseMaterials(
   courseMeta: CourseMeta
 ): AsyncGenerator<MaterialMeta> {
@@ -132,6 +161,8 @@ export async function* getCourseMaterials(
         url.pathname !== "/course.php" ||
         url.searchParams.get("f") !== "doc"
       ) {
+        // linked material (the copy should still be downloaded)
+        // XXX: this cannot be tested without logging in :(
         continue;
       }
       yield {

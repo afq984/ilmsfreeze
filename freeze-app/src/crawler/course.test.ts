@@ -3,6 +3,7 @@ import { RenderableError } from "../errors";
 import {
   getCourse,
   getCourseAnnouncements,
+  getCourseDiscussions,
   getCourseMaterials,
 } from "./course";
 import { capture, gather } from "./testutil";
@@ -47,6 +48,21 @@ suite("getCourse*", () => {
       getCourseAnnouncements(td.COURSE_1808)
     );
     assert.deepEqual(announcements, []);
+  });
+
+  test("Discussions", async () => {
+    const [discussions] = await gather(getCourseDiscussions(td.COURSE_40596));
+
+    assert.includeDeepMembers(discussions, [
+      td.DISCUSSION_236608,
+      td.DISCUSSION_258543,
+    ]);
+  });
+
+  test("DiscissionsEmpty", async () => {
+    const [discussions] = await gather(getCourseDiscussions(td.COURSE_1808));
+
+    assert.deepEqual(discussions, []);
   });
 
   test("Materials Course-40596", async () => {
