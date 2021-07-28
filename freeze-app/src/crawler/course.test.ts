@@ -1,6 +1,10 @@
 import { assert } from "@open-wc/testing";
 import { RenderableError } from "../errors";
-import { getCourse, getCourseAnnouncements } from "./course";
+import {
+  getCourse,
+  getCourseAnnouncements,
+  getCourseMaterials,
+} from "./course";
 import { capture, gather } from "./testutil";
 import * as td from "./testdata";
 
@@ -43,5 +47,26 @@ suite("getCourse*", () => {
       getCourseAnnouncements(td.COURSE_1808)
     );
     assert.deepEqual(announcements, []);
+  });
+
+  test("Materials Course-40596", async () => {
+    const [materials] = await gather(getCourseMaterials(td.COURSE_40596));
+
+    assert.includeDeepMembers(materials, [
+      td.MATERIAL_2004666,
+      td.MATERIAL_2173495,
+    ]);
+  });
+
+  test("Materials Course-74", async () => {
+    const [materials] = await gather(getCourseMaterials(td.COURSE_74));
+
+    assert.includeDeepMembers(materials, [td.MATERIAL_1518]);
+  });
+
+  test("MatirealsEmpty", async () => {
+    const [materials] = await gather(getCourseMaterials(td.COURSE_359));
+
+    assert.deepEqual(materials, []);
   });
 });

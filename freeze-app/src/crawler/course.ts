@@ -1,5 +1,5 @@
 import { error403 } from "../errors";
-import { AnnouncementMeta, CourseMeta } from "../types";
+import { AnnouncementMeta, CourseMeta, MaterialMeta } from "../types";
 import { Bug, mustParseInt, notnull } from "../utils";
 import {
   buildURL,
@@ -110,6 +110,34 @@ export async function* getCourseAnnouncements(
       yield {
         id: mustParseInt(mustGetQs(href.value, "newsID")),
         title: notnull(title.textContent),
+        course: `Course-${courseMeta.id}`,
+      };
+    }
+  }
+}
+
+export async function* getCourseMaterials(
+  courseMeta: CourseMeta
+): AsyncGenerator<MaterialMeta> {
+  for await (const html of flattenPaginator(courseMeta, "doclist")) {
+    for (const a of $x<Element>(
+      '//*[@id="main"]//tr[@class!="header"]/td[2]/div/a',
+      html
+    )) {
+      const url = new URL(
+        notnull(a.getAttribute("href")),
+        "https://example.com"
+      );
+      if (
+        url.pathname !== "/course.php" ||
+        url.searchParams.get("f") !== "doc"
+      ) {
+        continue;
+      }
+      yield {
+        id: mustParseInt(notnull(url.searchParams.get("cid"))),
+        title: notnull(a.textContent),
+        type: notnull(notnull(a.parentElement).getAttribute("class")),
         course: `Course-${courseMeta.id}`,
       };
     }
