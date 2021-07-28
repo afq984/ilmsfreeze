@@ -8,9 +8,11 @@ import {
   getCourseHomeworks,
   getCourseMaterials,
   getCourseScores,
+  processCourse,
 } from "./course";
 import { capture, gather } from "./testutil";
 import * as td from "./testdata";
+import { dl } from "./crawler";
 
 suite("getCourse", () => {
   test("open courses", async () => {
@@ -89,6 +91,18 @@ suite("getCourse*", () => {
     assert.deepEqual(materials, []);
   });
 
+  test("Matireals linked", async () => {
+    const [materials] = await gather(getCourseMaterials(td.COURSE_35305));
+
+    assert.includeDeepMembers(materials, [td.MATERIAL_2705536]);
+
+    for (const material of materials) {
+      if (material.id === td.MATERIAL_2705536.id) {
+        assert.deepEqual(material, td.MATERIAL_2705536);
+      }
+    }
+  });
+
   test("Homeworks", async () => {
     const [homeworks] = await gather(getCourseHomeworks(td.COURSE_40596));
 
@@ -117,5 +131,29 @@ suite("getCourse*", () => {
   test("GroupListEmpty", async () => {
     const [grouplists] = await gather(getCourseGroupLists(td.COURSE_1808));
     assert.deepEqual(grouplists, []);
+  });
+});
+
+suite("course", () => {
+  test("process", async () => {
+    const [children, saves] = await gather(processCourse(td.COURSE_40596));
+
+    assert.hasAllKeys(saves, ["index.html"]);
+
+    assert.includeDeepMembers(children, [
+      dl("Announcement", td.ANNOUNCEMENT_2008652),
+      dl("Announcement", td.ANNOUNCEMENT_2218728),
+      dl("Discussion", td.DISCUSSION_258543),
+      dl("Discussion", td.DISCUSSION_236608),
+      dl("Material", td.MATERIAL_2173495),
+      dl("Material", td.MATERIAL_2004666),
+      dl("Homework", td.HOMEWORK_198377),
+      dl("Homework", td.HOMEWORK_200355),
+      dl("GroupList", td.GROUPLIST_40596),
+    ]);
+  });
+
+  test("no permission", async () => {
+    assert.throw(await capture(gather(processCourse(td.COURSE_43491))));
   });
 });

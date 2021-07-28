@@ -93,7 +93,7 @@ export type Typename =
   | "Submission"
   | "Attachment"
   | "Score"
-  | "Grouplist"
+  | "GroupList"
   | "Video";
 
 export const isTypename = (s: string): s is Typename => {
@@ -106,7 +106,7 @@ export const isTypename = (s: string): s is Typename => {
     "Submission",
     "Attachment",
     "Score",
-    "Grouplist",
+    "GroupList",
     "Video",
   ].includes(s);
 };

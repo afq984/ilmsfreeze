@@ -1,4 +1,3 @@
-import { error403 } from "./../errors";
 import {
   DiscussionMeta,
   GroupListMeta,
@@ -20,33 +19,9 @@ import {
   parseDownloadableReference,
   SaveFiles,
   tableIsEmpty,
+  htmlGetMain,
 } from "./crawler";
 import { $x, $x1 } from "./xpath";
-
-const checkPermission = (html: Document) => {
-  const noPermission = $x(
-    `//div[contains(@style, "color:#F00;") and ` +
-      `(starts-with(text(), "權限不足!") or starts-with(text(), "No Permission!"))]` +
-      `/text()`,
-    html
-  );
-  if (noPermission.length > 0) {
-    throw error403(noPermission.join(" "));
-  }
-};
-
-const htmlGetMain = (html: Document) => {
-  checkPermission(html);
-  const mains = $x<Element>('//div[@id="main"]', html);
-  check(mains.length > 0);
-  const [main] = mains;
-  for (const bad of ['.//div[@class="infoPath"]', ".//script"]) {
-    for (const toRemove of $x<Element>(bad, main)) {
-      toRemove.parentElement?.removeChild(toRemove);
-    }
-  }
-  return main;
-};
 
 export function* getAttachments(
   parent: string,

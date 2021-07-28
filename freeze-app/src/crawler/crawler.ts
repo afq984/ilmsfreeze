@@ -1,7 +1,8 @@
 import { isTypename } from "./../types";
-import { AnyMeta, CourseMeta, Typename } from "../types";
+import { AnyMeta, Typename } from "../types";
 import { Bug, check, mustParseInt, notnull } from "../utils";
 import { $x } from "./xpath";
+import { error403 } from "../errors";
 
 export type SaveFileContent = string | ReadableStream<Uint8Array>;
 export type SaveFiles = Record<string, SaveFileContent>;
@@ -71,36 +72,27 @@ export const tableIsEmpty = (html: Node) => {
   return false;
 };
 
-export async function* flattenPaginator(
-  courseMeta: CourseMeta,
-  f: string,
-  page = 1
-) {
-  while (true) {
-    const response = await fetch200(
-      buildURL("/course.php", {
-        courseID: courseMeta.id.toFixed(),
-        f: f,
-        page: page.toFixed(),
-      })
-    );
-    const html = parseHTML(await response.text());
-
-    if (tableIsEmpty(html)) {
-      break;
-    }
-
-    yield html;
-
-    const nextHrefs = $x<Attr>(
-      '//span[@class="page"]//a[text()="Next"]/@href',
-      html
-    ).map((x) => x.value);
-    if (nextHrefs.length === 0) {
-      break;
-    }
-    const next_page = mustParseInt(mustGetQs(nextHrefs[0], "page"));
-    page++;
-    console.assert(page === next_page);
+const checkPermission = (html: Document) => {
+  const noPermission = $x(
+    `//div[contains(@style, "color:#F00;") and ` +
+      `(starts-with(text(), "權限不足!") or starts-with(text(), "No Permission!"))]` +
+      `/text()`,
+    html
+  );
+  if (noPermission.length > 0) {
+    throw error403(noPermission.join(" "));
   }
-}
+};
+
+export const htmlGetMain = (html: Document) => {
+  checkPermission(html);
+  const mains = $x<Element>('//div[@id="main"]', html);
+  check(mains.length > 0);
+  const [main] = mains;
+  for (const bad of ['.//div[@class="infoPath"]', ".//script"]) {
+    for (const toRemove of $x<Element>(bad, main)) {
+      toRemove.parentElement?.removeChild(toRemove);
+    }
+  }
+  return main;
+};

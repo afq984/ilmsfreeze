@@ -1,18 +1,22 @@
 import { error403 } from "../errors";
 import {
   AnnouncementMeta,
+  AnyMeta,
   CourseMeta,
   DiscussionMeta,
   GroupListMeta,
   HomeworkMeta,
   MaterialMeta,
   ScoreMeta,
+  Typename,
 } from "../types";
 import { Bug, mustParseInt, notnull } from "../utils";
 import {
   buildURL,
+  CrawlResult,
+  dl,
   fetch200,
-  flattenPaginator,
+  htmlGetMain,
   mustGetQs,
   parseHTML,
   tableIsEmpty,
@@ -108,6 +112,36 @@ export const getCourse = async (course_id: number): Promise<CourseMeta> => {
     is_admin: is_admin,
   };
 };
+
+async function* flattenPaginator(courseMeta: CourseMeta, f: string, page = 1) {
+  while (true) {
+    const response = await fetch200(
+      buildURL("/course.php", {
+        courseID: courseMeta.id.toFixed(),
+        f: f,
+        page: page.toFixed(),
+      })
+    );
+    const html = parseHTML(await response.text());
+
+    if (tableIsEmpty(html)) {
+      break;
+    }
+
+    yield html;
+
+    const nextHrefs = $x<Attr>(
+      '//span[@class="page"]//a[text()="Next"]/@href',
+      html
+    ).map((x) => x.value);
+    if (nextHrefs.length === 0) {
+      break;
+    }
+    const next_page = mustParseInt(mustGetQs(nextHrefs[0], "page"));
+    page++;
+    console.assert(page === next_page);
+  }
+}
 
 export async function* getCourseAnnouncements(
   courseMeta: CourseMeta
@@ -232,4 +266,34 @@ export async function* getCourseGroupLists(
       course: `Course-${courseMeta.id}`,
     };
   }
+}
+
+export async function* processCourse(courseMeta: CourseMeta): CrawlResult {
+  const getters: Array<[Typename, (_: CourseMeta) => AsyncGenerator<AnyMeta>]> =
+    [
+      ["Announcement", getCourseAnnouncements],
+      ["Material", getCourseMaterials],
+      ["Discussion", getCourseDiscussions],
+      ["Homework", getCourseHomeworks],
+      ["Score", getCourseScores],
+      ["GroupList", getCourseGroupLists],
+    ];
+  for (const [typename, func] of getters) {
+    for await (const meta of func(courseMeta)) {
+      yield dl(typename, meta);
+    }
+  }
+
+  const response = await fetch200(
+    buildURL("/course.php", {
+      courseID: courseMeta.id.toFixed(),
+      f: "syllabus",
+    })
+  );
+  const html = parseHTML(await response.text());
+  const main = htmlGetMain(html);
+
+  return {
+    "index.html": main.outerHTML,
+  };
 }
