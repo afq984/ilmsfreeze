@@ -4,6 +4,7 @@ import {
   getCourse,
   getCourseAnnouncements,
   getCourseDiscussions,
+  getCourseHomeworks,
   getCourseMaterials,
 } from "./course";
 import { capture, gather } from "./testutil";
@@ -84,5 +85,20 @@ suite("getCourse*", () => {
     const [materials] = await gather(getCourseMaterials(td.COURSE_359));
 
     assert.deepEqual(materials, []);
+  });
+
+  test("Homeworks", async () => {
+    const [homeworks] = await gather(getCourseHomeworks(td.COURSE_40596));
+
+    assert.includeDeepMembers(homeworks, [
+      td.HOMEWORK_198377,
+      td.HOMEWORK_200355,
+    ]);
+  });
+
+  test("HomeworksEmpty", async () => {
+    const [homeworks] = await gather(getCourseHomeworks(td.COURSE_1808));
+
+    assert.deepEqual(homeworks, []);
   });
 });

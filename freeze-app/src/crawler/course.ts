@@ -3,6 +3,7 @@ import {
   AnnouncementMeta,
   CourseMeta,
   DiscussionMeta,
+  HomeworkMeta,
   MaterialMeta,
 } from "../types";
 import { Bug, mustParseInt, notnull } from "../utils";
@@ -169,6 +170,23 @@ export async function* getCourseMaterials(
         id: mustParseInt(notnull(url.searchParams.get("cid"))),
         title: notnull(a.textContent),
         type: notnull(notnull(a.parentElement).getAttribute("class")),
+        course: `Course-${courseMeta.id}`,
+      };
+    }
+  }
+}
+
+export async function* getCourseHomeworks(
+  courseMeta: CourseMeta
+): AsyncGenerator<HomeworkMeta> {
+  for await (const html of flattenPaginator(courseMeta, "hwlist")) {
+    for (const a of $x<Element>(
+      '//*[@id="main"]//tr[@class!="header"]/td[2]/a[1]',
+      html
+    )) {
+      yield {
+        id: mustParseInt(mustGetQs(notnull(a.getAttribute("href")), "hw")),
+        title: notnull(a.textContent),
         course: `Course-${courseMeta.id}`,
       };
     }
