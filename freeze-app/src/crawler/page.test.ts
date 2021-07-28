@@ -30,7 +30,7 @@ import {
   MATERIAL_1518,
   MATERIAL_2173495,
   SUBMISSION_59376,
-  SUBMITTED_2474481,
+  SUBMISSION_2474481,
   VIDEO_1518,
 } from "./testdata";
 import { capture, gather } from "./testutil";
@@ -173,7 +173,7 @@ suite("homework", () => {
   test("open submission", async () => {
     const [children] = await gather(processHomework(HOMEWORK_220144));
 
-    assert.includeDeepMembers(children, [dl("Submission", SUBMITTED_2474481)]);
+    assert.includeDeepMembers(children, [dl("Submission", SUBMISSION_2474481)]);
   });
 
   test("open group submission", async () => {
@@ -192,7 +192,7 @@ suite("homework", () => {
 suite("submission", () => {
   test("process", async () => {
     const [children, saves] = await gather(
-      processSubmission(SUBMITTED_2474481)
+      processSubmission(SUBMISSION_2474481)
     );
 
     assert.deepEqual(children, [dl("Attachment", ATTACHMENT_2406879)]);

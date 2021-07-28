@@ -216,7 +216,7 @@ export const HOMEWORK_220144: HomeworkMeta = {
   course: "Course-43492",
 };
 
-export const SUBMITTED_2474481: SubmissionMeta = {
+export const SUBMISSION_2474481: SubmissionMeta = {
   id: 2474481,
   title: "105062321",
   by: "陳弘欣",
