@@ -100,18 +100,18 @@ export const getCourse = async (course_id: number): Promise<CourseMeta> => {
   };
 };
 
-export const getCourseAnnouncements = async (courseMeta: CourseMeta) => {
-  const result: AnnouncementMeta[] = [];
+export async function* getCourseAnnouncements(
+  courseMeta: CourseMeta
+): AsyncGenerator<AnnouncementMeta> {
   for await (const html of flattenPaginator(courseMeta, "news")) {
     for (const tr of $x('//*[@id="main"]//tr[@class!="header"]', html)) {
       const href = $x1<Attr>("td[1]/a/@href", tr);
       const title = $x1<Text>("td[2]//a/text()", tr);
-      result.push({
+      yield {
         id: mustParseInt(mustGetQs(href.value, "newsID")),
         title: notnull(title.textContent),
         course: `Course-${courseMeta.id}`,
-      });
+      };
     }
   }
-  return result;
-};
+}
