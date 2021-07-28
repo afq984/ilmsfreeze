@@ -1,8 +1,10 @@
 import { error403 } from "./../errors";
 import {
   DiscussionMeta,
+  GroupListMeta,
   HomeworkMeta,
   MaterialMeta,
+  ScoreMeta,
   SubmissionMeta,
   VideoMeta,
 } from "./../types";
@@ -311,3 +313,27 @@ export async function* processSubmission(
     "index.html": main.outerHTML,
   };
 }
+
+async function* processSinglePage(
+  f: string,
+  meta: ScoreMeta | GroupListMeta
+): CrawlResult {
+  const response = await fetch200(
+    buildURL("/course.php", {
+      courseID: parseDownloadableReference(meta.course).id.toFixed(),
+      f: f,
+    })
+  );
+  const html = parseHTML(await response.text());
+  const main = htmlGetMain(html);
+
+  return {
+    "index.html": main.outerHTML,
+  };
+}
+
+export const processScore = (scoreMeta: ScoreMeta): CrawlResult =>
+  processSinglePage("score", scoreMeta);
+
+export const processGroupList = (groupListMeta: GroupListMeta): CrawlResult =>
+  processSinglePage("grouplist", groupListMeta);

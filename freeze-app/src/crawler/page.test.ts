@@ -3,8 +3,10 @@ import { dl } from "./crawler";
 import {
   processAnnouncement,
   processDiscussion,
+  processGroupList,
   processHomework,
   processMaterial,
+  processScore,
   processSubmission,
 } from "./page";
 import {
@@ -203,6 +205,32 @@ suite("submission", () => {
     const [children, saves] = await gather(processSubmission(SUBMISSION_59376));
 
     assert.deepEqual(children, [dl("Attachment", ATTACHMENT_49113)]);
+    assert.hasAllKeys(saves, ["index.html"]);
+  });
+});
+
+suite("score", () => {
+  test("process", async () => {
+    const [children, saves] = await gather(
+      processScore({
+        course: "Course-74",
+      })
+    );
+
+    assert.isEmpty(children);
+    assert.hasAllKeys(saves, ["index.html"]);
+  });
+});
+
+suite("grouplist", () => {
+  test("process", async () => {
+    const [children, saves] = await gather(
+      processGroupList({
+        course: "Course-46274",
+      })
+    );
+
+    assert.isEmpty(children);
     assert.hasAllKeys(saves, ["index.html"]);
   });
 });

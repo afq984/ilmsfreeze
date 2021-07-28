@@ -69,8 +69,14 @@ export interface AttachmentMeta {
   children?: Array<string>;
 }
 
+export interface ScoreMeta {
+  course: string;
+  children?: Array<string>;
+}
+
 export interface GroupListMeta {
   course: string;
+  children?: Array<string>;
 }
 
 export interface VideoMeta {
@@ -86,6 +92,7 @@ export type Typename =
   | "Homework"
   | "Submission"
   | "Attachment"
+  | "Score"
   | "Grouplist"
   | "Video";
 
@@ -98,6 +105,7 @@ export const isTypename = (s: string): s is Typename => {
     "Homework",
     "Submission",
     "Attachment",
+    "Score",
     "Grouplist",
     "Video",
   ].includes(s);
@@ -111,5 +119,6 @@ export type AnyMeta =
   | HomeworkMeta
   | SubmissionMeta
   | AttachmentMeta
+  | ScoreMeta
   | GroupListMeta
   | VideoMeta;
