@@ -1,12 +1,19 @@
 import { assert } from "@open-wc/testing";
 import { dl } from "./crawler";
-import { processAnnouncement, processMaterial } from "./page";
+import {
+  processAnnouncement,
+  processDiscussion,
+  processMaterial,
+} from "./page";
 import {
   ANNOUNCEMENT_2218728,
   ATTACHMENT_2107249,
+  ATTACHMENT_2134734,
+  ATTACHMENT_2134738,
   ATTACHMENT_2616319,
   ATTACHMENT_2616320,
   ATTACHMENT_2616322,
+  DISCUSSION_258543,
   MATERIAL_1518,
   MATERIAL_2173495,
   VIDEO_1518,
@@ -68,6 +75,35 @@ suite("material", () => {
             id: 0,
             title: "invalid material",
             type: "Econtent",
+            course: "Course-74",
+          })
+        )
+      )
+    );
+  });
+});
+
+suite("discussion", () => {
+  test("process", async () => {
+    const [children, saves] = await gather(
+      processDiscussion(DISCUSSION_258543)
+    );
+
+    assert.hasAllKeys(saves, ["index.json"]);
+
+    assert.includeDeepMembers(children, [
+      dl("Attachment", ATTACHMENT_2134734),
+      dl("Attachment", ATTACHMENT_2134738),
+    ]);
+  });
+
+  test("invalid", async () => {
+    assert.throw(
+      await capture(
+        gather(
+          processDiscussion({
+            id: 0,
+            title: "invalid discussion",
             course: "Course-74",
           })
         )

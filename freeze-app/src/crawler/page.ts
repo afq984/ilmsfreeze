@@ -1,5 +1,5 @@
 import { error403 } from "./../errors";
-import { MaterialMeta, VideoMeta } from "./../types";
+import { DiscussionMeta, MaterialMeta, VideoMeta } from "./../types";
 import { AnnouncementMeta, AttachmentMeta } from "../types";
 import { check, mustParseInt, notnull } from "../utils";
 import {
@@ -147,5 +147,30 @@ export async function* processMaterial(
 
   return {
     "index.html": main.outerHTML,
+  };
+}
+
+export async function* processDiscussion(
+  discussionMeta: DiscussionMeta
+): CrawlResult {
+  const response = await fetch200(
+    buildURL("/sys/lib/ajax/post.php", {
+      id: discussionMeta.id.toFixed(),
+    })
+  );
+  const json = await response.json();
+
+  for (const post of json["posts"]["items"]) {
+    for (const attachment of post["attach"]) {
+      yield dl("Attachment", {
+        id: mustParseInt(attachment.id),
+        title: attachment.srcName,
+        parent: `Discussion-${discussionMeta.id}`,
+      });
+    }
+  }
+
+  return {
+    "index.json": JSON.stringify(json),
   };
 }
