@@ -4,6 +4,7 @@ import {
   getCourse,
   getCourseAnnouncements,
   getCourseDiscussions,
+  getCourseGroupLists,
   getCourseHomeworks,
   getCourseMaterials,
   getCourseScores,
@@ -106,5 +107,15 @@ suite("getCourse*", () => {
   test("ScoresEmpty", async () => {
     const [scores] = await gather(getCourseScores(td.COURSE_74));
     assert.deepEqual(scores, []);
+  });
+
+  test("GroupList", async () => {
+    const [grouplists] = await gather(getCourseGroupLists(td.COURSE_40596));
+    assert.deepEqual(grouplists, [td.GROUPLIST_40596]);
+  });
+
+  test("GroupListEmpty", async () => {
+    const [grouplists] = await gather(getCourseGroupLists(td.COURSE_1808));
+    assert.deepEqual(grouplists, []);
   });
 });

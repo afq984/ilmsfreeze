@@ -3,6 +3,7 @@ import {
   AnnouncementMeta,
   CourseMeta,
   DiscussionMeta,
+  GroupListMeta,
   HomeworkMeta,
   MaterialMeta,
   ScoreMeta,
@@ -14,6 +15,7 @@ import {
   flattenPaginator,
   mustGetQs,
   parseHTML,
+  tableIsEmpty,
 } from "./crawler";
 import { $x, $x1 } from "./xpath";
 
@@ -212,5 +214,22 @@ export async function* getCourseScores(
     ).length === 0
   ) {
     yield { course: `Course-${courseMeta.id}` };
+  }
+}
+
+export async function* getCourseGroupLists(
+  courseMeta: CourseMeta
+): AsyncGenerator<GroupListMeta> {
+  const response = await fetch200(
+    buildURL("/course.php", {
+      f: "grouplist",
+      courseID: courseMeta.id.toFixed(),
+    })
+  );
+  const html = parseHTML(await response.text());
+  if (!tableIsEmpty(html)) {
+    yield {
+      course: `Course-${courseMeta.id}`,
+    };
   }
 }
