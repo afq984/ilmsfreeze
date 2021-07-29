@@ -263,6 +263,7 @@ export const HOMEWORK_183084: HomeworkMeta = {
 };
 
 export const GROUPLIST_40596: GroupListMeta = {
+  id: 40596,
   course: "Course-40596",
 };
 

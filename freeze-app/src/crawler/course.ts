@@ -247,7 +247,10 @@ export async function* getCourseScores(
       html
     ).length === 0
   ) {
-    yield { course: `Course-${courseMeta.id}` };
+    yield {
+      id: courseMeta.id,
+      course: `Course-${courseMeta.id}`,
+    };
   }
 }
 
@@ -263,6 +266,7 @@ export async function* getCourseGroupLists(
   const html = parseHTML(await response.text());
   if (!tableIsEmpty(html)) {
     yield {
+      id: courseMeta.id,
       course: `Course-${courseMeta.id}`,
     };
   }

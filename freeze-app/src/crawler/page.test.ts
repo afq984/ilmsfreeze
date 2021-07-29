@@ -213,6 +213,7 @@ suite("score", () => {
   test("process", async () => {
     const [children, saves] = await gather(
       processScore({
+        id: 74,
         course: "Course-74",
       })
     );
@@ -226,6 +227,7 @@ suite("grouplist", () => {
   test("process", async () => {
     const [children, saves] = await gather(
       processGroupList({
+        id: 46274,
         course: "Course-46274",
       })
     );

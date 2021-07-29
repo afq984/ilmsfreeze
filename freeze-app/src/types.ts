@@ -70,11 +70,13 @@ export interface AttachmentMeta {
 }
 
 export interface ScoreMeta {
+  id: number;
   course: string;
   children?: Array<string>;
 }
 
 export interface GroupListMeta {
+  id: number;
   course: string;
   children?: Array<string>;
 }
