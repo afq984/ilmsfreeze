@@ -200,7 +200,7 @@ export class FreezeDump extends LitElement {
         <div class="oops">(._.)</div>
         <div>Cannot download without write access</div>
         <div style="margin-top: 20px">
-          <button class="button" @click=${this._requestWriteAccess}>
+          <button class="button is-info" @click=${this._requestWriteAccess}>
             Grant Write Access
           </button>
         </div>
