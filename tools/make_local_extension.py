@@ -18,15 +18,19 @@ if os.path.exists(outdir):
 for path in files:
     if not path:
         continue
-    with open(path) as f:
-        content = f.read()
-
-    for from_, to in replacements:
-        content = content.replace(from_, to)
 
     outpath = f'localhost-{path}'
     os.makedirs(os.path.dirname(outpath), exist_ok=True)
-    with open(outpath, 'w') as f:
-        f.write(content)
+
+    if path.endswith('.png'):
+        shutil.copy(path, outpath)
+    else:
+        with open(path) as f:
+            content = f.read()
+
+        for from_, to in replacements:
+            content = content.replace(from_, to)
+        with open(outpath, 'w') as f:
+            f.write(content)
 
     print('written', outpath)
