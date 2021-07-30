@@ -58,6 +58,7 @@ export class FreezeDownload extends BaseView {
 
   @state()
   directoryAccess = DirectoryState.None;
+  dh!: FileSystemDirectoryHandle;
 
   createRenderRoot() {
     return this;
@@ -73,12 +74,12 @@ export class FreezeDownload extends BaseView {
   }
 
   async prepareState(_location: RouterLocation, source: FileSystemDataSource) {
-    const dh = source.rootHandle;
-    if ((await dh.queryPermission({ mode: "read" })) !== "granted") {
+    this.dh = source.rootHandle;
+    if ((await this.dh.queryPermission({ mode: "read" })) !== "granted") {
       this.directoryAccess = DirectoryState.None;
       return;
     }
-    if ((await dh.queryPermission({ mode: "readwrite" })) !== "granted") {
+    if ((await this.dh.queryPermission({ mode: "readwrite" })) !== "granted") {
       this.directoryAccess = DirectoryState.ReadOnly;
       return;
     }
@@ -95,7 +96,10 @@ export class FreezeDownload extends BaseView {
         </span>
       </p>
       <hr />
-      <freeze-dump .directoryAccess=${this.directoryAccess}></freeze-dump>
+      <freeze-dump
+        .directoryAccess=${this.directoryAccess}
+        .dh=${this.dh}
+      ></freeze-dump>
     `;
   }
 }
@@ -105,6 +109,9 @@ export class FreezeDump extends LitElement {
   createRenderRoot() {
     return this;
   }
+
+  @state()
+  dh!: FileSystemDirectoryHandle;
 
   @state()
   directoryAccess = DirectoryState.None;
@@ -139,7 +146,7 @@ export class FreezeDump extends LitElement {
       return;
     }
     ++this.downloadRunning;
-    console.assert(this.downloadRunning);
+    console.assert(this.downloadRunning === 1, this.downloadRunning);
     for (
       ;
       this.completedDownloads < this.queue.length;
@@ -150,14 +157,14 @@ export class FreezeDump extends LitElement {
     }
 
     --this.downloadRunning;
-    console.assert(this.downloadRunning);
+    console.assert(this.downloadRunning === 0, this.downloadRunning);
   }
 
   addCourse(course: CourseMeta) {
     if (this.added[course.id]) {
       return;
     }
-    const dm = new UIDownloadManager(course);
+    const dm = new UIDownloadManager(course, this.dh);
     this.added[course.id] = dm;
     this.queue.push(dm);
     this.doDownload();
@@ -340,7 +347,7 @@ export class FreezeDumpCourse extends LitElement {
                 class="progress is-info"
                 value="${dm.progress}"
                 max="${dm.total}"
-                style="height: 4px; margin-top: 6px; margin-bottom: 4px"
+                style="height: 4px; margin-top: 8px; margin-bottom: 4px"
               >
                 ${dm.progress}/${dm.total}
               </progress>
@@ -355,12 +362,12 @@ export class FreezeDumpCourse extends LitElement {
   }
 }
 
-export class UIDownloadManager extends DownloadManager {
+class UIDownloadManager extends DownloadManager {
   course: CourseMeta;
   ui?: FreezeDumpCourse;
 
-  constructor(course: CourseMeta) {
-    super({ typename: "Course", meta: course });
+  constructor(course: CourseMeta, dh: FileSystemDirectoryHandle) {
+    super({ typename: "Course", meta: course }, dh);
     this.course = course;
   }
 

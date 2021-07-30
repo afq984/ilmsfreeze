@@ -8,6 +8,7 @@ import {
   MaterialMeta,
   ScoreMeta,
   SubmissionMeta,
+  Typename,
   VideoMeta,
 } from "../types";
 import { Bug } from "../utils";
@@ -75,9 +76,11 @@ export class DownloadManager {
   progress = 0;
   total = 0;
   message = "";
+  dh: FileSystemDirectoryHandle;
 
-  constructor(target: Downloadable) {
+  constructor(target: Downloadable, dh: FileSystemDirectoryHandle) {
     this.target = target;
+    this.dh = dh;
   }
 
   stateChanged() {}
@@ -105,6 +108,49 @@ export class DownloadManager {
     this.stateChanged();
   }
 
+  async downloadFile(
+    typename: Typename,
+    itemID: number,
+    itemName: string,
+    name: string,
+    content: string | ReadableStream
+  ) {
+    const typedir = await this.dh.getDirectoryHandle(typename.toLowerCase(), {
+      create: true,
+    });
+    const objdir = await typedir.getDirectoryHandle(itemID.toFixed(), {
+      create: true,
+    });
+    const fileHandle = await objdir.getFileHandle(name, { create: true });
+    const stream = await fileHandle.createWritable();
+
+    if (!(content instanceof ReadableStream)) {
+      await stream.write(content);
+      await stream.close();
+      return;
+    }
+
+    let bytesWritten = 0;
+    const reportTransform = new TransformStream({
+      transform: (
+        chunk: Uint8Array,
+        controller: TransformStreamDefaultController
+      ) => {
+        bytesWritten += chunk.byteLength;
+        this.setState(
+          this.progress,
+          this.total,
+          `${itemName} ${(bytesWritten * 1e-6).toFixed(1)}MB`
+        );
+
+        controller.enqueue(chunk);
+      },
+    });
+
+    const reportingStream = content.pipeThrough(reportTransform);
+    await reportingStream.pipeTo(stream);
+  }
+
   private async downloadInternal() {
     let currentItem = 0;
     let totalItems = 1;
@@ -117,31 +163,41 @@ export class DownloadManager {
       this.setState(currentItem, totalItems, itemName);
 
       const result = processItem(item);
+      const children = [];
+
       for (;;) {
         const { value, done } = await result.next();
+
+        // handle save files
         if (done) {
           const saveFiles = value as SaveFiles;
-          for (const [, value] of Object.entries(saveFiles)) {
-            if (!(value instanceof ReadableStream)) continue;
-            const stream = value as ReadableStream;
-            let nbytes = 0;
-            const sink = new WritableStream({
-              write: (chunk: Uint8Array) => {
-                nbytes += chunk.byteLength;
-                this.setState(
-                  currentItem,
-                  totalItems,
-                  `${itemName} ${(nbytes * 1e-6).toFixed(1)}MB`
-                );
-              },
-            });
-            await stream.pipeTo(sink);
+          if (saveFiles["meta.json"] === undefined) {
+            await this.downloadFile(
+              item.typename,
+              item.meta.id,
+              itemName,
+              "meta.json",
+              JSON.stringify({ ...item.meta, children: children })
+            );
           }
-
+          for (const [name, value] of Object.entries(saveFiles)) {
+            await this.downloadFile(
+              item.typename,
+              item.meta.id,
+              itemName,
+              name,
+              value
+            );
+          }
           break;
         }
+
+        // handle children
         ++totalItems;
-        queue.push(value as Downloadable);
+        const child = value as Downloadable;
+        children.push(`${child.typename}-${child.meta.id}`);
+        queue.push(child);
+
         this.setState(currentItem, totalItems, `${itemName}`);
       }
     }
