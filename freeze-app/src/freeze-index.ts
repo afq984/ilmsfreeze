@@ -82,7 +82,6 @@ export class FreezeIndex extends LitElement {
           Hello! ilmsfreeze helps you back up & view
           ${externalLink("NTHU iLMS", "https://lms.nthu.edu.tw/")} data in the
           browser.<br />
-          <strong>NOTE: This is currently a work in progress.</strong>
         </p>
         <p>
           Source code is hosted on
