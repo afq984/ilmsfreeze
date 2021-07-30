@@ -1,8 +1,10 @@
 import { RouterLocation } from "@vaadin/router";
 import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
+import { repeat } from "lit/directives/repeat.js";
 import { BaseView } from "./base-view.js";
 import { getCourse, getEnrolledCourses } from "./crawler/course";
+import { DownloadManager, DownloadState } from "./crawler/download-manager.js";
 import { FileSystemDataSource } from "./data-source.js";
 import { RenderableError } from "./errors.js";
 
@@ -112,10 +114,18 @@ export class FreezeDownload extends BaseView {
 @customElement("freeze-dump")
 export class FreezeDump extends BaseView {
   @state()
-  courses: CourseMeta[] = [];
+  enrolledCourses: CourseMeta[] = [];
+
   @state()
-  queue: CourseMeta[] = [];
-  added: { [_: number]: boolean } = {};
+  queue: UIDownloadManager[] = [];
+  added: { [_: number]: DownloadManager } = {};
+
+  @state()
+  completedDownloads = 0;
+
+  // XXX is this async-safe?
+  downloadRunning = 0;
+
   @query("#dump-course-id")
   courseIdInput!: HTMLInputElement;
 
@@ -130,19 +140,40 @@ export class FreezeDump extends BaseView {
       );
     }
 
-    this.courses = await getEnrolledCourses();
+    this.enrolledCourses = await getEnrolledCourses();
+  }
+
+  private async doDownload() {
+    if (this.downloadRunning > 0) {
+      return;
+    }
+    ++this.downloadRunning;
+    console.assert(this.downloadRunning);
+    for (
+      ;
+      this.completedDownloads < this.queue.length;
+      this.completedDownloads++
+    ) {
+      const dm = this.queue[this.completedDownloads];
+      await dm.download();
+    }
+
+    --this.downloadRunning;
+    console.assert(this.downloadRunning);
   }
 
   addCourse(course: CourseMeta) {
     if (this.added[course.id]) {
       return;
     }
-    this.added[course.id] = true;
-    this.queue.push(course);
+    const dm = new UIDownloadManager(course);
+    this.added[course.id] = dm;
+    this.queue.push(dm);
+    this.doDownload();
   }
 
   addEnrolledCourses() {
-    for (const course of this.courses) {
+    for (const course of this.enrolledCourses) {
       if (course.id in this.added) {
         continue;
       }
@@ -153,6 +184,7 @@ export class FreezeDump extends BaseView {
 
   async addSelectedCourse() {
     const course = await getCourse(parseInt(this.courseIdInput.value));
+    this.courseIdInput.value = "";
     this.addCourse(course);
     this.requestUpdate();
   }
@@ -167,6 +199,11 @@ export class FreezeDump extends BaseView {
               class="input has-text-centered"
               type="text"
               placeholder="Course ID"
+              @keyup=${(event: KeyboardEvent) => {
+                if (event.key !== "Enter") return;
+                this.addSelectedCourse();
+                event.preventDefault();
+              }}
             />
           </div>
           <div class="control">
@@ -183,7 +220,7 @@ export class FreezeDump extends BaseView {
             <input
               class="input has-text-centered is-italic"
               type="text"
-              value="all ${this.courses.length} enrolled courses"
+              value="all ${this.enrolledCourses.length} enrolled courses"
               readonly
             />
           </div>
@@ -191,7 +228,7 @@ export class FreezeDump extends BaseView {
             <button
               class="button is-info"
               @click=${this.addEnrolledCourses}
-              ?disabled=${this.courses.length === 0}
+              ?disabled=${this.enrolledCourses.length === 0}
             >
               ${materialIcon("download")}
               <span>Download</span>
@@ -203,30 +240,34 @@ export class FreezeDump extends BaseView {
   }
 
   renderQueue() {
+    if (this.queue.length === 0) {
+      return html`<span class="panel-block">
+        <div style="width: 100%">
+          <div class="oops has-text-centered">ᕦ( ᐛ )ᕡ</div>
+          <div class=" has-text-centered">No courses queued for download.</div>
+        </div>
+      </span>`;
+    }
     return html`
       <div class="container" style="max-width: 768px">
         <div class="panel">
-          <p class="panel-heading">Downloading 0/${this.queue.length}</p>
-
-          ${this.queue.length
-            ? this.queue.map(
-                (course) =>
-                  html`
-                    <span class="panel-block">
-                      <freeze-dump-course
-                        .course=${course}
-                      ></freeze-dump-course>
-                    </span>
-                  `
-              )
-            : html`<span class="panel-block">
-                <div style="width: 100%">
-                  <div class="oops has-text-centered">ᕦ( ᐛ )ᕡ</div>
-                  <div class=" has-text-centered">
-                    No courses queued for download.
-                  </div>
-                </div>
-              </span>`}
+          <p class="panel-heading">
+            Downloads ${this.completedDownloads}/${this.queue.length}
+          </p>
+          ${repeat(
+            this.queue,
+            (dm) => dm.course.id,
+            (dm) =>
+              html`
+                <span class="panel-block">
+                  <freeze-dump-course
+                    .course=${dm.course}
+                    .downloadManager=${dm}
+                    style="width: 100%"
+                  ></freeze-dump-course>
+                </span>
+              `
+          )}
         </div>
       </div>
     `;
@@ -244,16 +285,72 @@ export class FreezeDumpCourse extends LitElement {
   }
 
   course!: CourseMeta;
+  downloadManager!: UIDownloadManager;
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.downloadManager.ui = this;
+  }
+
+  startDownload() {
+    this.downloadManager.download();
+  }
+
+  getIconName(status: DownloadState) {
+    switch (status) {
+      case DownloadState.Scheduled:
+        return "hourglass_empty";
+      case DownloadState.Processing:
+        return "downloading";
+      case DownloadState.Completed:
+        return "file_download_done";
+      case DownloadState.Errored:
+        return "error";
+    }
+  }
 
   render() {
+    const dm = this.downloadManager;
     return html`
-      ${materialIcon("hourglass_empty")}
-      <span class="tag">${this.course.id}</span>
-      <span>${this.course.name}</span>
-      <span class="tag">${this.course.serial}</span>
-      ${this.course.is_admin
-        ? html`<span class="tag is-primary is-light">admin</span>`
-        : undefined}
+      <span> ${materialIcon(this.getIconName(dm.status))} </span>
+      <span>
+        <span class="tag">${this.course.id}</span>
+        <span>${this.course.name}</span>
+        <span class="tag">${this.course.serial}</span>
+        ${this.course.is_admin
+          ? html`<span class="tag is-primary is-light">admin</span>`
+          : undefined}
+        ${dm.status === DownloadState.Processing
+          ? html`
+              <progress
+                class="progress is-info"
+                value="${dm.progress}"
+                max="${dm.total}"
+                style="height: 4px; margin-top: 6px; margin-bottom: 4px"
+              >
+                ${dm.progress}/${dm.total}
+              </progress>
+              <small style="opacity: .7"
+                >Downloading (${dm.progress}/${dm.total})...
+                ${dm.message}</small
+              >
+            `
+          : undefined}
+      </span>
     `;
+  }
+}
+
+export class UIDownloadManager extends DownloadManager {
+  course: CourseMeta;
+  ui?: FreezeDumpCourse;
+
+  constructor(course: CourseMeta) {
+    super({ typename: "Course", meta: course });
+    this.course = course;
+  }
+
+  stateChanged() {
+    this.ui?.requestUpdate();
   }
 }
