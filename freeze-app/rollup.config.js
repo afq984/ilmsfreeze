@@ -1,5 +1,6 @@
 // Import rollup plugins
 import html from "@web/rollup-plugin-html";
+import typescript from "@rollup/plugin-typescript";
 import { copy } from "@web/rollup-plugin-copy";
 import resolve from "@rollup/plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
@@ -25,10 +26,6 @@ const plugins = () => {
     }),
     // Print bundle summary
     summary(),
-    // Optional: copy any static assets to build directory
-    copy({
-      patterns: ["sys/**/*", "sw-status.json"],
-    }),
   ];
 };
 
@@ -40,17 +37,28 @@ export default [
       html({
         input: "index.html",
       }),
-    ].concat(plugins()),
+      typescript({ tsconfig: "src/tsconfig.json", outDir: null }),
+      ...plugins(),
+      // Optional: copy any static assets to build directory
+      copy({
+        patterns: ["sys/**/*", "sw-status.json"],
+      }),
+    ],
     output: {
       dir: "out/dist",
+      sourcemap: true,
     },
     preserveEntrySignatures: "strict",
   },
   {
-    input: "out/tsc/sw.js",
-    plugins: plugins(),
+    input: "service-worker/sw.ts",
+    plugins: [
+      typescript({ tsconfig: "service-worker/tsconfig.json", outDir: null }),
+      ...plugins(),
+    ],
     output: {
       dir: "out/dist",
+      sourcemap: true,
     },
   },
 ];
