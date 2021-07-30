@@ -16,7 +16,6 @@ export class FreezeNavbar extends DirectoryChangeAwareView {
   }
 
   async handleDirectoryChange(rootHandle: FileSystemDirectoryHandle) {
-    console.log(443);
     if ((await rootHandle.queryPermission({ mode: "read" })) !== "granted") {
       this.directoryName = "no directory";
       this.directoryAccess = "unknown";
