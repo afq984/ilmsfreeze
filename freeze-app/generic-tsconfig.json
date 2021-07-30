@@ -2,11 +2,9 @@
   "compilerOptions": {
     "target": "es2019",
     "module": "es2020",
-    "declaration": true,
-    "declarationMap": true,
     "sourceMap": true,
     "inlineSources": true,
-    "outDir": "./out/tsc",
+    "outDir": "out/tsc",
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
