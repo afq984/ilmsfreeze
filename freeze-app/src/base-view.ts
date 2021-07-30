@@ -5,13 +5,9 @@ import { errorNoSource, RenderableError } from "./errors";
 import { renderError } from "./html";
 import { RouterSource } from "./routes";
 
-export abstract class BaseView extends LitElement {
+export abstract class DirectoryChangeAwareView extends LitElement {
   private subscribedTo?: Element;
   private directoryChangedListener: EventListener;
-  location?: RouterLocation;
-  activeUrl?: string;
-  router?: RouterSource;
-  error?: RenderableError;
 
   constructor() {
     super();
@@ -20,22 +16,6 @@ export abstract class BaseView extends LitElement {
         (e as CustomEvent).detail as FileSystemDirectoryHandle
       );
     };
-  }
-
-  createRenderRoot() {
-    return this;
-  }
-
-  async onBeforeEnter(
-    location: RouterLocation,
-    _: Commands,
-    router: RouterSource
-  ) {
-    this.router = router;
-    this.activeUrl = location.pathname;
-    if (router.dataSource !== undefined) {
-      await this.prepareStateProtected(router.dataSource);
-    }
   }
 
   private async subscribe(e: Element, rootHandle?: FileSystemDirectoryHandle) {
@@ -64,7 +44,32 @@ export abstract class BaseView extends LitElement {
     );
   }
 
-  private async handleDirectoryChange(rootHandle: FileSystemDirectoryHandle) {
+  abstract handleDirectoryChange(rootHandle: FileSystemDirectoryHandle): any;
+}
+
+export abstract class BaseView extends DirectoryChangeAwareView {
+  location?: RouterLocation;
+  activeUrl?: string;
+  router?: RouterSource;
+  private error?: RenderableError;
+
+  createRenderRoot() {
+    return this;
+  }
+
+  async onBeforeEnter(
+    location: RouterLocation,
+    _: Commands,
+    router: RouterSource
+  ) {
+    this.router = router;
+    this.activeUrl = location.pathname;
+    if (router.dataSource !== undefined) {
+      await this.prepareStateProtected(router.dataSource);
+    }
+  }
+
+  async handleDirectoryChange(rootHandle: FileSystemDirectoryHandle) {
     const source = new FileSystemDataSource(rootHandle);
     await this.prepareStateProtected(source);
     this.requestUpdate();

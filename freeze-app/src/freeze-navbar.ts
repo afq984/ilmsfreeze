@@ -1,10 +1,54 @@
-import { LitElement, html } from "lit";
-import { customElement } from "lit/decorators.js";
+import { html } from "lit";
+import { customElement, state } from "lit/decorators.js";
+import { classMap } from "lit/directives/class-map.js";
+import { DirectoryChangeAwareView } from "./base-view";
 import { materialIcon } from "./html";
+
 @customElement("freeze-navbar")
-export class FreezeNavbar extends LitElement {
+export class FreezeNavbar extends DirectoryChangeAwareView {
+  @state()
+  directoryName = "no directory";
+  @state()
+  directoryAccess = "unknown";
+
   createRenderRoot() {
     return this;
+  }
+
+  async handleDirectoryChange(rootHandle: FileSystemDirectoryHandle) {
+    console.log(443);
+    if ((await rootHandle.queryPermission({ mode: "read" })) !== "granted") {
+      this.directoryName = "no directory";
+      this.directoryAccess = "unknown";
+      return;
+    }
+    this.directoryName = rootHandle.name;
+    if (
+      (await rootHandle.queryPermission({ mode: "readwrite" })) === "granted"
+    ) {
+      this.directoryAccess = "readwrite";
+    } else {
+      this.directoryAccess = "readonly";
+    }
+  }
+
+  renderDirectoryStatus() {
+    const directoryAccessClasses = {
+      tag: true,
+      "is-success": this.directoryAccess === "readwrite",
+      "is-info": this.directoryAccess === "readonly",
+      "is-warning": this.directoryAccess === "unknown",
+    };
+    return html`<div class="field is-grouped is-grouped-multiline">
+      <div class="control">
+        <div class="tags has-addons">
+          <span class="tag is-dark">${this.directoryName}</span>
+          <span class=${classMap(directoryAccessClasses)}
+            >${this.directoryAccess}</span
+          >
+        </div>
+      </div>
+    </div>`;
   }
 
   render() {
@@ -39,6 +83,7 @@ export class FreezeNavbar extends LitElement {
           </div>
 
           <div class="navbar-end">
+            <div class="navbar-item">${this.renderDirectoryStatus()}</div>
             <div class="navbar-item">
               <div class="buttons">
                 <button

@@ -6,7 +6,7 @@ import { BaseView } from "./base-view.js";
 import { getCourse, getEnrolledCourses } from "./crawler/course";
 import { DownloadManager, DownloadState } from "./crawler/download-manager.js";
 import { FileSystemDataSource } from "./data-source.js";
-import { RenderableError } from "./errors.js";
+import "./freeze-no-source";
 
 import {
   externalLink,
@@ -45,14 +45,19 @@ const getLoginState = async () => {
   return renderStatus(statusSuccess, `Logged in as ${loggedInAs}`);
 };
 
+enum DirectoryState {
+  None,
+  ReadOnly,
+  ReadWrite,
+}
+
 @customElement("freeze-download")
 export class FreezeDownload extends BaseView {
   @state()
   ilmsAccess = renderStatus(statusUnknown, "Unknown");
+
   @state()
-  directoryName = "";
-  @state()
-  directoryWritable = false;
+  directoryAccess = DirectoryState.None;
 
   createRenderRoot() {
     return this;
@@ -63,56 +68,47 @@ export class FreezeDownload extends BaseView {
     this.getStatus();
   }
 
-  async getStatus() {
+  private async getStatus() {
     this.ilmsAccess = await getLoginState();
   }
 
-  async prepareState(_: RouterLocation, source: FileSystemDataSource) {
-    const h = source.rootHandle;
-    [this.directoryName, this.directoryWritable] = [
-      h.name,
-      (await h.queryPermission({ mode: "readwrite" })) === "granted",
-    ];
+  async prepareState(_location: RouterLocation, source: FileSystemDataSource) {
+    const dh = source.rootHandle;
+    if ((await dh.queryPermission({ mode: "read" })) !== "granted") {
+      this.directoryAccess = DirectoryState.None;
+      return;
+    }
+    if ((await dh.queryPermission({ mode: "readwrite" })) !== "granted") {
+      this.directoryAccess = DirectoryState.ReadOnly;
+      return;
+    }
+    this.directoryAccess = DirectoryState.ReadWrite;
   }
 
   renderState() {
     return html`
       <p class="has-text-centered">
-        <span
-          >${externalLink("iLMS", "https://lms.nthu.edu.tw")} status:
-          ${this.ilmsAccess}</span
-        >&emsp;|&emsp;<span
-          >Directory:
-          ${this.directoryName !== ""
-            ? html`<code>${this.directoryName}</code>`
-            : "None"}</span
-        >${this.directoryName !== ""
-          ? html`&emsp;|&emsp;<span
-                >Writable:
-                ${this.directoryWritable
-                  ? renderStatus(statusSuccess, "Yes")
-                  : html`${renderStatus(statusFail, "No")};
-                      <a @click=${this._requestWriteAccess}>
-                        Grant Access
-                      </a>`}</span
-              >`
-          : ""}
+        <span>
+          ${externalLink("iLMS", "https://lms.nthu.edu.tw")} status:
+          ${this.ilmsAccess}
+          <span style="opacity: 0.7">(refresh page to update status)</span>
+        </span>
       </p>
       <hr />
-      <freeze-dump .router=${this.router}></freeze-dump>
+      <freeze-dump .directoryAccess=${this.directoryAccess}></freeze-dump>
     `;
   }
-
-  private _requestWriteAccess() {
-    this.dispatchEvent(new Event("request-write", { bubbles: true }));
-  }
-
-  render() {
-    return this.renderState();
-  }
 }
+
 @customElement("freeze-dump")
-export class FreezeDump extends BaseView {
+export class FreezeDump extends LitElement {
+  createRenderRoot() {
+    return this;
+  }
+
+  @state()
+  directoryAccess = DirectoryState.None;
+
   @state()
   enrolledCourses: CourseMeta[] = [];
 
@@ -129,17 +125,12 @@ export class FreezeDump extends BaseView {
   @query("#dump-course-id")
   courseIdInput!: HTMLInputElement;
 
-  async prepareState(_location: RouterLocation, source: FileSystemDataSource) {
-    if (
-      "granted" !==
-      (await source.rootHandle.queryPermission({ mode: "readwrite" }))
-    ) {
-      throw new RenderableError(
-        "(._.)",
-        "Cannot download without write access"
-      );
-    }
+  constructor() {
+    super();
+    this.setEnrolledCoursesAsync();
+  }
 
+  private async setEnrolledCoursesAsync() {
     this.enrolledCourses = await getEnrolledCourses();
   }
 
@@ -187,6 +178,29 @@ export class FreezeDump extends BaseView {
     this.courseIdInput.value = "";
     this.addCourse(course);
     this.requestUpdate();
+  }
+
+  private _requestWriteAccess() {
+    this.dispatchEvent(new Event("request-write", { bubbles: true }));
+  }
+
+  render() {
+    if (this.directoryAccess === DirectoryState.None) {
+      return html`<freeze-no-source></freeze-no-source>`;
+    }
+    if (this.directoryAccess === DirectoryState.ReadOnly) {
+      return html`<div class="has-text-centered">
+        <div class="oops">(._.)</div>
+        <div>Cannot download without write access</div>
+        <div style="margin-top: 20px">
+          <button class="button" @click=${this._requestWriteAccess}>
+            Grant Write Access
+          </button>
+        </div>
+      </div>`;
+    }
+    console.assert(this.directoryAccess === DirectoryState.ReadWrite);
+    return this.renderState();
   }
 
   renderForm() {

@@ -57,10 +57,11 @@ export class FreezeApp extends LitElement {
     });
     const cachedHandle = await this.db.get("keyval", "storedHandle");
     if (cachedHandle !== undefined) {
-      if (
-        (await cachedHandle.queryPermission({ mode: "read" })) === "granted"
-      ) {
+      const readPerm = await cachedHandle.queryPermission({ mode: "read" });
+      if (readPerm === "granted") {
         this.setRootHandle(cachedHandle, true);
+      } else {
+        console.log("Bad read perm:", readPerm);
       }
     }
   }
@@ -95,7 +96,10 @@ export class FreezeApp extends LitElement {
 
   render() {
     return html`
-      <freeze-navbar @directory-open=${this._onClick}></freeze-navbar>
+      <freeze-navbar
+        @subscribe=${this._onSubscribe}
+        @directory-open=${this._onClick}
+      ></freeze-navbar>
 
       <div class="section">
         <main
@@ -121,11 +125,7 @@ export class FreezeApp extends LitElement {
     const rw = await this.rootHandle.queryPermission({ mode: "readwrite" });
     if (rw === "prompt") {
       await this.rootHandle.requestPermission({ mode: "readwrite" });
-      this.dispatchEvent(
-        new CustomEvent("directory-changed", {
-          detail: this.rootHandle,
-        })
-      );
+      this.setRootHandle(this.rootHandle);
     }
   }
 
