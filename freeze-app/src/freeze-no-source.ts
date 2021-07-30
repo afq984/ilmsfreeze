@@ -2,7 +2,7 @@ import { html, LitElement } from "lit";
 import { customElement } from "lit/decorators.js";
 
 @customElement("freeze-no-source")
-export class Freeze404 extends LitElement {
+export class FreezeNoSource extends LitElement {
   createRenderRoot() {
     return this;
   }

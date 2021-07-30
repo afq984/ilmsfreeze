@@ -12,7 +12,7 @@ const setSessionId = async (value) => {
             {
               header: "Cookie",
               operation: "set",
-              value: `PHPSESSID=${value}`,
+              value: `PHPSESSID=${value}; ck_locale=en-us`,
             },
           ],
         },

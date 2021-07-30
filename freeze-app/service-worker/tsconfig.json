@@ -2,6 +2,7 @@
   "extends": "../generic-tsconfig.json",
   "compilerOptions": {
     "lib": ["es2020", "webworker"],
-    "rootDir": "."
+    "rootDir": ".",
+    "skipLibCheck": true
   }
 }

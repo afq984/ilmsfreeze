@@ -17,3 +17,6 @@ export const errorNoSource = () => (Math.random() < 0.5 ? 佛心 : 公司);
 
 export const error400 = (message: string) =>
   new RenderableError("ヽ(´ー｀)┌", message);
+
+export const error403 = (message: string) =>
+  new RenderableError("（・Ａ・）", message);

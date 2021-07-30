@@ -53,20 +53,24 @@ export class FreezeIndex extends LitElement {
   }
 
   async checkServiceWorkerStatus() {
-    const response = await fetch("/sw-status.json");
-    const status = await response.json();
-    switch (status.version) {
-      case null:
-        this.serviceWorkerStatus = statusWarn;
-        this.serviceWorkerDescription = "Unavailable";
-        break;
-      case 1:
-        this.serviceWorkerStatus = statusSuccess;
-        this.serviceWorkerDescription = "Active";
-        break;
-      default:
-        this.serviceWorkerStatus = statusUnknown;
-        this.serviceWorkerDescription = "Unknown";
+    for (let i = 1; i < 100; i *= 1.3) {
+      const response = await fetch("/sw-status.json");
+      const status = await response.json();
+      switch (status.version) {
+        case null:
+          this.serviceWorkerStatus = statusWarn;
+          this.serviceWorkerDescription = "Unavailable";
+          break;
+        case 1:
+          this.serviceWorkerStatus = statusSuccess;
+          this.serviceWorkerDescription = "Active";
+          return;
+        default:
+          this.serviceWorkerStatus = statusUnknown;
+          this.serviceWorkerDescription = "Unknown";
+          return;
+      }
+      await new Promise((r) => setTimeout(r, i * 1000));
     }
   }
 
@@ -133,10 +137,11 @@ export class FreezeIndex extends LitElement {
             : renderStatus(statusWarn, `Not installed`)}
         </dt>
         <dd>
-          You need the Chrome Extension to <em>download</em> from the iLMS.<br />
-          Alternatively, you can load the <code>ilmsdump.out</code> directory
-          produced by
-          ${externalLink("ilmsdump", "https://github.com/afq984/ilmsdump")}.
+          You need the Chrome Extension to <em>download</em> from iLMS.<br />
+          Alternatively, you can use
+          ${externalLink("ilmsdump", "https://github.com/afq984/ilmsdump")} to
+          backup.<br />
+          ilmsfreeze is compatible with the <code>ilmsdump.out</code> directory.
         </dd>
       </dl>
     `;
