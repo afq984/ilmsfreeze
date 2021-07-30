@@ -1,0 +1,11 @@
+<?xml version="1.0" standalone="no"?>
+<svg width="128" height="128" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="64" cy="64" r="48" stroke="transparent" fill="#227799"/>
+  <style>
+    .ilmsfreeze {
+        font: bold 48px 'Roboto Condensed';
+        fill: white;
+    }
+  </style>
+  <text x="50%" y="55%" class="ilmsfreeze" text-anchor="middle" dominant-baseline="middle">iLf</text>
+</svg>
