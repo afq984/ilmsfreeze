@@ -175,7 +175,9 @@ suite("homework", () => {
   test("open submission", async () => {
     const [children] = await gather(processHomework(HOMEWORK_220144));
 
-    assert.includeDeepMembers(children, [dl("SubmittedHomework", SUBMISSION_2474481)]);
+    assert.includeDeepMembers(children, [
+      dl("SubmittedHomework", SUBMISSION_2474481),
+    ]);
   });
 
   test("open group submission", async () => {
