@@ -163,7 +163,7 @@ suite("homework", () => {
     assert.isAtLeast(children.length, 50);
 
     for (const child of children) {
-      assert.equal(child.typename, "Submission");
+      assert.equal(child.typename, "SubmittedHomework");
     }
   });
 
@@ -175,13 +175,13 @@ suite("homework", () => {
   test("open submission", async () => {
     const [children] = await gather(processHomework(HOMEWORK_220144));
 
-    assert.includeDeepMembers(children, [dl("Submission", SUBMISSION_2474481)]);
+    assert.includeDeepMembers(children, [dl("SubmittedHomework", SUBMISSION_2474481)]);
   });
 
   test("open group submission", async () => {
     const [children] = await gather(processHomework(HOMEWORK_18264));
 
-    assert.deepEqual(children, [dl("Submission", SUBMISSION_59376)]);
+    assert.deepEqual(children, [dl("SubmittedHomework", SUBMISSION_59376)]);
   });
 
   test("donload a without content", async () => {

@@ -37,7 +37,7 @@ const processItem = ({ typename, meta }: Downloadable): CrawlResult => {
       return processDiscussion(meta as DiscussionMeta);
     case "Homework":
       return processHomework(meta as HomeworkMeta);
-    case "Submission":
+    case "SubmittedHomework":
       return processSubmission(meta as SubmissionMeta);
     case "Attachment":
       return processAttachment(meta as AttachmentMeta);
