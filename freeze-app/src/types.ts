@@ -70,13 +70,13 @@ export interface AttachmentMeta {
 }
 
 export interface ScoreMeta {
-  id: number;
+  id: number; // ilmsdump's meta doesn't have id, it is inferred from course
   course: string;
   children?: Array<string>;
 }
 
 export interface GroupListMeta {
-  id: number;
+  id: number; // ilmsdump's meta doesn't have id, it is inferred from course
   course: string;
   children?: Array<string>;
 }
