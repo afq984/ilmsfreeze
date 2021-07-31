@@ -20,6 +20,7 @@ import {
 } from "./html.js";
 import { RouterSource } from "./routes.js";
 import { CourseMeta } from "./types.js";
+import { mustParseInt } from "./utils.js";
 
 const getLoginState = async () => {
   let response: Response;
@@ -228,8 +229,17 @@ export class FreezeDump extends LitElement {
   }
 
   async addSelectedCourse() {
-    const course = await getCourse(parseInt(this.courseIdInput.value));
+    const courseID = this.courseIdInput.value;
     this.courseIdInput.value = "";
+
+    let course: CourseMeta;
+    try {
+      course = await getCourse(mustParseInt(courseID));
+    } catch (e) {
+      ask("Cannot add course", e.toString(), "Close", "");
+      this.requestUpdate();
+      return;
+    }
     this.addCourse(course);
     this.requestUpdate();
   }

@@ -26,7 +26,7 @@ suite("getCourse", () => {
     assert.throws(
       await capture(getCourse(0)),
       RenderableError,
-      "Empty response returend from course, the course probably doesn't exist: course_id=0"
+      "Empty response returned from course, the course probably doesn't exist: course_id=0"
     );
   });
 
