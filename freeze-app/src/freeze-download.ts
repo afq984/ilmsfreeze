@@ -1,4 +1,4 @@
-import { RouterLocation } from "@vaadin/router";
+import { Commands, RouterLocation } from "@vaadin/router";
 import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
@@ -7,6 +7,7 @@ import { getCourse, getEnrolledCourses } from "./crawler/course";
 import { DownloadManager, DownloadState } from "./crawler/download-manager.js";
 import { FileSystemDataSource } from "./data-source.js";
 import "./freeze-no-source";
+import { ask } from "./freeze-prompt.js";
 
 import {
   externalLink,
@@ -17,6 +18,7 @@ import {
   statusUnknown,
   statusWarn,
 } from "./html.js";
+import { RouterSource } from "./routes.js";
 import { CourseMeta } from "./types.js";
 
 const getLoginState = async () => {
@@ -60,6 +62,16 @@ export class FreezeDownload extends BaseView {
   directoryAccess = DirectoryState.None;
   dh!: FileSystemDirectoryHandle;
 
+  @query("freeze-dump")
+  dumper?: FreezeDump;
+
+  windowOnBeforeUnload: () => boolean | null;
+
+  constructor() {
+    super();
+    this.windowOnBeforeUnload = () => this.downlaodIsRunning() || null;
+  }
+
   createRenderRoot() {
     return this;
   }
@@ -67,6 +79,41 @@ export class FreezeDownload extends BaseView {
   connectedCallback() {
     super.connectedCallback();
     this.getStatus();
+  }
+
+  private downlaodIsRunning() {
+    if (this.dumper === undefined || this.dumper === null) {
+      return false;
+    }
+    return this.dumper.downloadRunning > 0;
+  }
+
+  async onBeforeEnter(
+    location: RouterLocation,
+    commands: Commands,
+    router: RouterSource
+  ) {
+    window.onbeforeunload = this.windowOnBeforeUnload;
+    console.log("zz");
+    await super.onBeforeEnter(location, commands, router);
+  }
+
+  async onBeforeLeave(_: any, commands: Commands) {
+    window.onbeforeunload = null;
+
+    if (!this.downlaodIsRunning()) {
+      return;
+    }
+    const leave = await ask(
+      "Are you sure you want to leave?",
+      "Download will be interrupted.",
+      "Leave",
+      "Cancel"
+    );
+    if (!leave) {
+      return commands.prevent();
+    }
+    return;
   }
 
   private async getStatus() {
@@ -92,7 +139,7 @@ export class FreezeDownload extends BaseView {
         <span>
           ${externalLink("iLMS", "https://lms.nthu.edu.tw")} status:
           ${this.ilmsAccess}
-          <span style="opacity: 0.7">(refresh page to update status)</span>
+          <span style="opacity: 0.7">(refresh this page to update status)</span>
         </span>
       </p>
       <hr />

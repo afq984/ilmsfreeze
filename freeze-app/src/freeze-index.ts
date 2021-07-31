@@ -139,8 +139,8 @@ export class FreezeIndex extends LitElement {
           You need the Chrome Extension to <em>download</em> from iLMS.<br />
           Alternatively, you can use
           ${externalLink("ilmsdump", "https://github.com/afq984/ilmsdump")} to
-          backup.<br />
-          ilmsfreeze is compatible with the <code>ilmsdump.out</code> directory.
+          backup. ilmsfreeze is compatible with the
+          <code>ilmsdump.out</code> directory.
         </dd>
       </dl>
     `;
