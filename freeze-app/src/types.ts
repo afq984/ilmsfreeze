@@ -92,7 +92,7 @@ export type Typename =
   | "Material"
   | "Discussion"
   | "Homework"
-  | "Submission"
+  | "SubmittedHomework"
   | "Attachment"
   | "Score"
   | "GroupList"
@@ -105,7 +105,7 @@ export const isTypename = (s: string): s is Typename => {
     "Material",
     "Discussion",
     "Homework",
-    "Submission",
+    "SubmittedHomework",
     "Attachment",
     "Score",
     "GroupList",

@@ -227,7 +227,7 @@ export const SUBMISSION_2474481: SubmissionMeta = {
 export const ATTACHMENT_2406879: AttachmentMeta = {
   id: 2406879,
   title: "105062321.pdf",
-  parent: "Submission-2474481",
+  parent: "SubmittedHomework-2474481",
 };
 
 export const HOMEWORK_18264: HomeworkMeta = {
@@ -247,7 +247,7 @@ export const SUBMISSION_59376: SubmissionMeta = {
 export const ATTACHMENT_49113: AttachmentMeta = {
   id: 49113,
   title: "管理學報告.pptx",
-  parent: "Submission-59376",
+  parent: "SubmittedHomework-59376",
 };
 
 export const HOMEWORK_182409: HomeworkMeta = {

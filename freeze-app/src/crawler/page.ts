@@ -249,7 +249,7 @@ export async function* processHomework(
         tr.childNodes[iname]
       ).data;
 
-      yield dl("Submission", {
+      yield dl("SubmittedHomework", {
         id: id,
         title: title,
         by: by,
@@ -278,7 +278,7 @@ export async function* processSubmission(
   const main = htmlGetMain(html);
 
   for (const attachment of getAttachments(
-    `Submission-${submissionMeta.id}`,
+    `SubmittedHomework-${submissionMeta.id}`,
     main
   )) {
     yield dl("Attachment", attachment);
