@@ -81,7 +81,7 @@ export const getCourse = async (course_id: number): Promise<CourseMeta> => {
   const body = await response.text();
   if (body.trim().length === 0) {
     throw error403(
-      `Empty response returend from course, the course probably doesn't exist: course_id=${course_id}`
+      `Empty response returned from course, the course probably doesn't exist: course_id=${course_id}`
     );
   }
 

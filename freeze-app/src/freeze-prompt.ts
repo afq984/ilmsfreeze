@@ -40,9 +40,10 @@ export class FreezePrompt extends LitElement {
           <button class="button is-info" @click=${() => this.closeWith(true)}>
             ${this.yes}
           </button>
-          <button class="button" @click=${() => this.closeWith(false)}>
+          ${this.no &&
+          html`<button class="button" @click=${() => this.closeWith(false)}>
             ${this.no}
-          </button>
+          </button>`}
         </section>
       </div>
     </div>`;
