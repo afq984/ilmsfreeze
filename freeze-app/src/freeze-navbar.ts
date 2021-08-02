@@ -65,12 +65,9 @@ export class FreezeNavbar extends DirectoryChangeAwareView {
           </a>
           <a href="/course/" class="navbar-item">Browse</a>
           <a href="/download" class="navbar-item">Download</a>
-          <span class="navbar-item"
-            >${externalLink(
-              "GitHub",
-              "https://github.com/afq984/ilmsfreeze"
-            )}</span
-          >
+          ${externalLink("GitHub", "https://github.com/afq984/ilmsfreeze", {
+            "navbar-item": true,
+          })}
         </div>
 
         <div
