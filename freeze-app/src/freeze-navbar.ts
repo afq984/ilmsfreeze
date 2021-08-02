@@ -2,7 +2,7 @@ import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { DirectoryChangeAwareView } from "./base-view";
-import { materialIcon } from "./html";
+import { externalLink, materialIcon } from "./html";
 
 @customElement("freeze-navbar")
 export class FreezeNavbar extends DirectoryChangeAwareView {
@@ -65,6 +65,12 @@ export class FreezeNavbar extends DirectoryChangeAwareView {
           </a>
           <a href="/course/" class="navbar-item">Browse</a>
           <a href="/download" class="navbar-item">Download</a>
+          <span class="navbar-item"
+            >${externalLink(
+              "GitHub",
+              "https://github.com/afq984/ilmsfreeze"
+            )}</span
+          >
         </div>
 
         <div
