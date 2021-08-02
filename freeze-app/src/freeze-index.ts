@@ -136,7 +136,12 @@ export class FreezeIndex extends LitElement {
             : renderStatus(statusWarn, `Not installed`)}
         </dt>
         <dd>
-          You need the Chrome Extension to <em>download</em> from iLMS.<br />
+          You need the
+          ${externalLink(
+            "Chrome Extension",
+            "https://chrome.google.com/webstore/detail/jmchkngdnmcmenihgjknjoamfdkpojcn"
+          )}
+          to <em>download</em> from iLMS.<br />
           Alternatively, you can use
           ${externalLink("ilmsdump", "https://github.com/afq984/ilmsdump")} to
           backup. ilmsfreeze is compatible with the
