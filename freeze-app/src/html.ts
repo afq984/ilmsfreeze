@@ -15,8 +15,14 @@ export const materialIcon = (
 export const unsafeContent = (content: string) =>
   html`<div class="content">${unsafeHTML(content)}</div>`;
 
-export const externalLink = (text: string, url: string) =>
-  html`<a target="_blank" href=${url}><span class="icon-text">${text}</span>${materialIcon(
+export const externalLink = (
+  text: string,
+  url: string,
+  classes: Record<string, boolean> = {}
+) =>
+  html`<a target="_blank" href=${url} class=${classMap(
+    classes
+  )}><span class="icon-text">${text}</span>${materialIcon(
     "open_in_new"
   )}</span></a>`;
 
