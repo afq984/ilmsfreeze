@@ -95,7 +95,6 @@ export class FreezeDownload extends BaseView {
     router: RouterSource
   ) {
     window.onbeforeunload = this.windowOnBeforeUnload;
-    console.log("zz");
     await super.onBeforeEnter(location, commands, router);
   }
 
