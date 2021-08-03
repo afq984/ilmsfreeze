@@ -44,14 +44,14 @@ export const menuItemScore = {
   typename: "score",
   displayname: "成績計算",
   countable: false,
-  path: "/course/:course_id/score/",
+  path: "/course/:course_id/score",
   component: "freeze-course-score",
 };
 export const menuItemGrouplist = {
   typename: "grouplist",
   displayname: "小組專區",
   countable: false,
-  path: "/course/:course_id/grouplist/",
+  path: "/course/:course_id/grouplist",
   component: "freeze-course-grouplist",
 };
 
