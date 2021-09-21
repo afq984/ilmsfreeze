@@ -118,7 +118,6 @@ export class FreezeApp extends LitElement {
   }
 
   private async _onRequestWrite() {
-    console.log(this);
     if (this.rootHandle === undefined) {
       return;
     }
