@@ -2,14 +2,15 @@ import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { RouterLocation } from "@vaadin/router";
 
-import { BaseView } from "./base-view.js";
+import { BrowseBaseView } from "./base-view.js";
 import { DataSource } from "./data-source.js";
 import { TableFields, textField } from "./freeze-table";
 import "./freeze-pathbar";
 import { CourseMeta } from "./types.js";
 import "./freeze-no-source";
+
 @customElement("freeze-browse")
-export class FreezeBrowse extends BaseView {
+export class FreezeBrowse extends BrowseBaseView {
   @property({ attribute: false })
   courses: Array<CourseMeta> = [];
 
@@ -27,6 +28,7 @@ export class FreezeBrowse extends BaseView {
       name: linkfn,
     };
     return html`
+      ${this.renderHeader()}
       <div class="columns">
         <div class="column">
           <freeze-table
@@ -40,7 +42,8 @@ export class FreezeBrowse extends BaseView {
     `;
   }
 
-  async prepareState(_location: RouterLocation, source: DataSource) {
+  async prepareState(location: RouterLocation, source: DataSource) {
+    super.prepareState(location, source);
     this.courses = await source.getAllMeta("course");
   }
 }
