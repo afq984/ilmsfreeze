@@ -1,6 +1,6 @@
 import { Commands, Context, Route, Router } from "@vaadin/router";
 import { getRedirectLocation } from "./course-php";
-import { FileSystemDataSource } from "./data-source";
+import { DataSource } from "./data-source";
 import { RenderableError } from "./errors";
 
 export interface MenuItem {
@@ -146,5 +146,5 @@ export const routes: Array<Route> = (
 ]);
 
 export class RouterSource extends Router {
-  dataSource?: FileSystemDataSource;
+  dataSource?: DataSource;
 }

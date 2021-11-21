@@ -1,6 +1,6 @@
 import { Commands, RouterLocation } from "@vaadin/router";
 import { LitElement, TemplateResult } from "lit";
-import { FileSystemDataSource } from "./data-source";
+import { DataSource } from "./data-source";
 import { errorNoSource, RenderableError } from "./errors";
 import { renderError } from "./html";
 import { RouterSource } from "./routes";
@@ -12,16 +12,14 @@ export abstract class DirectoryChangeAwareView extends LitElement {
   constructor() {
     super();
     this.directoryChangedListener = (e: Event) => {
-      this.handleDirectoryChange(
-        (e as CustomEvent).detail as FileSystemDirectoryHandle
-      );
+      this.handleDirectoryChange((e as CustomEvent).detail as DataSource);
     };
   }
 
-  private async subscribe(e: Element, rootHandle?: FileSystemDirectoryHandle) {
+  private async subscribe(e: Element, dataSource?: DataSource) {
     this.subscribedTo = e;
-    if (rootHandle !== undefined) {
-      await this.handleDirectoryChange(rootHandle);
+    if (dataSource !== undefined) {
+      await this.handleDirectoryChange(dataSource);
     }
     e.addEventListener("directory-changed", this.directoryChangedListener);
   }
@@ -29,8 +27,8 @@ export abstract class DirectoryChangeAwareView extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     const options = {
-      detail: async (e: Element, rootHandle?: FileSystemDirectoryHandle) => {
-        await this.subscribe(e, rootHandle);
+      detail: async (e: Element, dataSource?: DataSource) => {
+        await this.subscribe(e, dataSource);
       },
       bubbles: true,
     };
@@ -44,7 +42,7 @@ export abstract class DirectoryChangeAwareView extends LitElement {
     );
   }
 
-  abstract handleDirectoryChange(rootHandle: FileSystemDirectoryHandle): any;
+  abstract handleDirectoryChange(dataSource: DataSource): any;
 }
 
 export abstract class BaseView extends DirectoryChangeAwareView {
@@ -69,13 +67,12 @@ export abstract class BaseView extends DirectoryChangeAwareView {
     }
   }
 
-  async handleDirectoryChange(rootHandle: FileSystemDirectoryHandle) {
-    const source = new FileSystemDataSource(rootHandle);
-    await this.prepareStateProtected(source);
+  async handleDirectoryChange(dataSource: DataSource) {
+    await this.prepareStateProtected(dataSource);
     this.requestUpdate();
   }
 
-  private async prepareStateProtected(source: FileSystemDataSource) {
+  private async prepareStateProtected(source: DataSource) {
     try {
       await this.prepareState(this.location!, source);
     } catch (e) {
@@ -105,7 +102,7 @@ export abstract class BaseView extends DirectoryChangeAwareView {
 
   abstract prepareState(
     _location: RouterLocation,
-    _source: FileSystemDataSource
+    _source: DataSource
   ): Promise<any>;
 
   abstract renderState(): TemplateResult;

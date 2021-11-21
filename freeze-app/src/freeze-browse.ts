@@ -3,7 +3,7 @@ import { customElement, property } from "lit/decorators.js";
 import { RouterLocation } from "@vaadin/router";
 
 import { BaseView } from "./base-view.js";
-import { FileSystemDataSource } from "./data-source.js";
+import { DataSource } from "./data-source.js";
 import { TableFields, textField } from "./freeze-table";
 import "./freeze-pathbar";
 import { CourseMeta } from "./types.js";
@@ -40,7 +40,7 @@ export class FreezeBrowse extends BaseView {
     `;
   }
 
-  async prepareState(_location: RouterLocation, source: FileSystemDataSource) {
+  async prepareState(_location: RouterLocation, source: DataSource) {
     this.courses = await source.getAllMeta("course");
   }
 }

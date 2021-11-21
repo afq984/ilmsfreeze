@@ -6,7 +6,7 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import "./freeze-no-source";
 import "./freeze-404";
 import { BaseView } from "./base-view.js";
-import { FileSystemDataSource } from "./data-source.js";
+import { DataSource } from "./data-source.js";
 import { Fragment, fragmentsPush, homeFragment } from "./freeze-pathbar.js";
 import "./freeze-sidemenu";
 import { TableFields, textField } from "./freeze-table.js";
@@ -40,7 +40,7 @@ const getParamId = (params: IndexedParams, field: string) => {
 
 const getParamMeta = async (
   params: IndexedParams,
-  source: FileSystemDataSource,
+  source: DataSource,
   typename: string
 ) => {
   const id = getParamId(params, `${typename}_id`);
@@ -55,7 +55,7 @@ abstract class FreezeCourseBase extends BaseView {
     super();
   }
 
-  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+  async prepareState(location: RouterLocation, source: DataSource) {
     const course_id = parseInt(location.params.course_id.toString());
     this.courseMeta = await source.getMeta("course", course_id);
     this.courseChildren = parseChildren(this.courseMeta!.children);
@@ -95,7 +95,7 @@ export class FreezeCourseOverview extends FreezeCourseBase {
     ];
   }
 
-  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+  async prepareState(location: RouterLocation, source: DataSource) {
     await super.prepareState(location, source);
     this.body = await source.getText(
       "course",
@@ -142,7 +142,7 @@ export class FreezeCourseScore extends FreezeCourseL2Base {
 
   body = "";
 
-  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+  async prepareState(location: RouterLocation, source: DataSource) {
     await super.prepareState(location, source);
     this.body = await source.getText(
       "score",
@@ -162,7 +162,7 @@ export class FreezeCourseGrouplist extends FreezeCourseL2Base {
 
   body = "";
 
-  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+  async prepareState(location: RouterLocation, source: DataSource) {
     await super.prepareState(location, source);
     this.body = await source.getText(
       "grouplist",
@@ -191,7 +191,7 @@ abstract class FreezeCourseTable<T> extends FreezeCourseL2Base {
     };
   }
 
-  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+  async prepareState(location: RouterLocation, source: DataSource) {
     await super.prepareState(location, source);
     this.table = await source.getMetas(
       this.typename,
@@ -274,7 +274,7 @@ export class FreezeAnnouncement extends FreezeCourseL2Base {
     });
   }
 
-  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+  async prepareState(location: RouterLocation, source: DataSource) {
     await super.prepareState(location, source);
     const announcement_id = parseInt(
       location.params.announcement_id.toString()
@@ -349,7 +349,7 @@ export class FreezeMaterial extends FreezeCourseL2Base {
     });
   }
 
-  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+  async prepareState(location: RouterLocation, source: DataSource) {
     super.prepareState(location, source);
     this.materialMeta = await getParamMeta(location.params, source, "material");
     this.materialChildren = parseChildren(this.materialMeta!.children);
@@ -389,7 +389,7 @@ export class FreezeDiscussion extends FreezeCourseL2Base {
   discussionMeta?: DiscussionMeta;
   discussionJson?: any;
 
-  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+  async prepareState(location: RouterLocation, source: DataSource) {
     super.prepareState(location, source);
     this.discussionMeta = await getParamMeta(
       location.params,
@@ -479,7 +479,7 @@ export class FreezeHomework extends FreezeCourseL2Base {
     return frag;
   }
 
-  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+  async prepareState(location: RouterLocation, source: DataSource) {
     super.prepareState(location, source);
     this.homeworkMeta = await getParamMeta(location.params, source, "homework");
     this.body = await source.getText(
@@ -506,7 +506,7 @@ export class FreezeHomeworkSubmissions extends FreezeHomework {
     return frag;
   }
 
-  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+  async prepareState(location: RouterLocation, source: DataSource) {
     await super.prepareState(location, source);
     this.submissions = await source.getMetas(
       "submittedhomework",
@@ -567,7 +567,7 @@ export class FreezeSubmission extends FreezeHomeworkSubmissions {
     });
   }
 
-  async prepareState(location: RouterLocation, source: FileSystemDataSource) {
+  async prepareState(location: RouterLocation, source: DataSource) {
     await super.prepareState(location, source);
     this.submissionMeta = await getParamMeta(
       location.params,
