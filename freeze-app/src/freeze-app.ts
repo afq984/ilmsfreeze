@@ -64,7 +64,7 @@ export class FreezeApp extends LitElement {
 
     const q = new URLSearchParams(window.location.search);
     const remote = q.get("open");
-    if (remote !== null) {
+    if (remote === "https://ilmsdump.afq984.org") {
       this.setDataSource(new RemoteDataSource(remote));
       window.history.replaceState("", "", window.location.pathname);
       return;
