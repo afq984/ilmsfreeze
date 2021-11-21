@@ -5,7 +5,7 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import "./freeze-no-source";
 import "./freeze-404";
-import { BaseView } from "./base-view.js";
+import { BrowseBaseView } from "./base-view.js";
 import { DataSource } from "./data-source.js";
 import { Fragment, fragmentsPush, homeFragment } from "./freeze-pathbar.js";
 import "./freeze-sidemenu";
@@ -46,7 +46,8 @@ const getParamMeta = async (
   const id = getParamId(params, `${typename}_id`);
   return await source.getMeta(typename, id);
 };
-abstract class FreezeCourseBase extends BaseView {
+
+abstract class FreezeCourseBase extends BrowseBaseView {
   courseMeta?: CourseMeta;
   courseChildren?: ChildrenMap;
   abstract fragments(): Array<Fragment>;
@@ -56,6 +57,8 @@ abstract class FreezeCourseBase extends BaseView {
   }
 
   async prepareState(location: RouterLocation, source: DataSource) {
+    super.prepareState(location, source);
+
     const course_id = parseInt(location.params.course_id.toString());
     this.courseMeta = await source.getMeta("course", course_id);
     this.courseChildren = parseChildren(this.courseMeta!.children);
@@ -65,6 +68,7 @@ abstract class FreezeCourseBase extends BaseView {
 
   renderState() {
     return html`
+      ${this.renderHeader()}
       <freeze-pathbar .fragments=${this.fragments()}></freeze-pathbar>
       <div class="columns">
         <freeze-sidemenu

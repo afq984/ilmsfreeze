@@ -7,6 +7,7 @@ const warnAndThrow = (e: any): never => {
 
 export abstract class DataSource {
   abstract get name(): string;
+  abstract header(): Promise<string | null>;
   abstract get(typename: string, id: number, filename: string): Promise<Blob>;
   abstract getAllMeta(typename: string): Promise<Array<any>>;
 
@@ -66,6 +67,10 @@ export class FileSystemDataSource extends DataSource {
     this.rootHandle = rootHandle;
   }
 
+  async header() {
+    return null;
+  }
+
   get name() {
     return this.rootHandle.name;
   }
@@ -123,6 +128,17 @@ export class RemoteDataSource extends DataSource {
 
   get name() {
     return this.baseURL;
+  }
+
+  async header() {
+    const resp = await this.fetch("source.json");
+    try {
+      const json = await resp.json();
+      return json.header;
+    } catch (e) {
+      warnAndThrow(e);
+    }
+    return null;
   }
 
   private async fetch(path: string) {

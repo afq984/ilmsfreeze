@@ -1,5 +1,5 @@
 import { Commands, RouterLocation } from "@vaadin/router";
-import { LitElement, TemplateResult } from "lit";
+import { html, LitElement, TemplateResult } from "lit";
 import { DataSource } from "./data-source";
 import { errorNoSource, RenderableError } from "./errors";
 import { renderError } from "./html";
@@ -106,4 +106,19 @@ export abstract class BaseView extends DirectoryChangeAwareView {
   ): Promise<any>;
 
   abstract renderState(): TemplateResult;
+}
+
+export abstract class BrowseBaseView extends BaseView {
+  header: string | null = null;
+
+  async prepareState(_location: RouterLocation, source: DataSource) {
+    this.header = await source.header();
+  }
+
+  renderHeader() {
+    if (this.header === null) {
+      return undefined;
+    }
+    return html`<div class="notification">${this.header}</div>`;
+  }
 }
