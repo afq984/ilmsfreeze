@@ -2,6 +2,11 @@ import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { DirectoryChangeAwareView } from "./base-view";
+import {
+  DataSource,
+  FileSystemDataSource,
+  RemoteDataSource,
+} from "./data-source";
 import { externalLink, materialIcon } from "./html";
 
 @customElement("freeze-navbar")
@@ -15,18 +20,23 @@ export class FreezeNavbar extends DirectoryChangeAwareView {
     return this;
   }
 
-  async handleDirectoryChange(rootHandle: FileSystemDirectoryHandle) {
-    if ((await rootHandle.queryPermission({ mode: "read" })) !== "granted") {
-      this.directoryName = "no directory";
-      this.directoryAccess = "unknown";
-      return;
-    }
-    this.directoryName = rootHandle.name;
-    if (
-      (await rootHandle.queryPermission({ mode: "readwrite" })) === "granted"
-    ) {
-      this.directoryAccess = "readwrite";
-    } else {
+  async handleDirectoryChange(dataSource: DataSource) {
+    this.directoryName = dataSource.name;
+    if (dataSource instanceof FileSystemDataSource) {
+      const rootHandle = dataSource.rootHandle;
+      if ((await rootHandle.queryPermission({ mode: "read" })) !== "granted") {
+        this.directoryName = "no directory";
+        this.directoryAccess = "unknown";
+        return;
+      }
+      if (
+        (await rootHandle.queryPermission({ mode: "readwrite" })) === "granted"
+      ) {
+        this.directoryAccess = "readwrite";
+      } else {
+        this.directoryAccess = "readonly";
+      }
+    } else if (dataSource instanceof RemoteDataSource) {
       this.directoryAccess = "readonly";
     }
   }

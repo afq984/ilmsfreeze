@@ -14,7 +14,7 @@ export class FreezeNoSource extends LitElement {
       <div class="oops has-text-centered">
         ${Math.random() < 0.5 ? 佛心 : 公司}
       </div>
-      <div class="has-text-centered">Open a directory to get started</div>
+      <div class="has-text-centered">Open a local directory to get started</div>
     </div>`;
   }
 }

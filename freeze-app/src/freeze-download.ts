@@ -5,7 +5,11 @@ import { repeat } from "lit/directives/repeat.js";
 import { BaseView } from "./base-view.js";
 import { getCourse, getEnrolledCourses } from "./crawler/course";
 import { DownloadManager, DownloadState } from "./crawler/download-manager.js";
-import { FileSystemDataSource } from "./data-source.js";
+import {
+  DataSource,
+  FileSystemDataSource,
+  RemoteDataSource,
+} from "./data-source.js";
 import "./freeze-no-source";
 import { ask } from "./freeze-prompt.js";
 
@@ -52,6 +56,7 @@ enum DirectoryState {
   None,
   ReadOnly,
   ReadWrite,
+  Remote,
 }
 
 @customElement("freeze-download")
@@ -120,17 +125,23 @@ export class FreezeDownload extends BaseView {
     this.ilmsAccess = await getLoginState();
   }
 
-  async prepareState(_location: RouterLocation, source: FileSystemDataSource) {
-    this.dh = source.rootHandle;
-    if ((await this.dh.queryPermission({ mode: "read" })) !== "granted") {
-      this.directoryAccess = DirectoryState.None;
-      return;
+  async prepareState(_location: RouterLocation, source: DataSource) {
+    if (source instanceof FileSystemDataSource) {
+      this.dh = source.rootHandle;
+      if ((await this.dh.queryPermission({ mode: "read" })) !== "granted") {
+        this.directoryAccess = DirectoryState.None;
+        return;
+      }
+      if (
+        (await this.dh.queryPermission({ mode: "readwrite" })) !== "granted"
+      ) {
+        this.directoryAccess = DirectoryState.ReadOnly;
+        return;
+      }
+      this.directoryAccess = DirectoryState.ReadWrite;
+    } else if (source instanceof RemoteDataSource) {
+      this.directoryAccess = DirectoryState.Remote;
     }
-    if ((await this.dh.queryPermission({ mode: "readwrite" })) !== "granted") {
-      this.directoryAccess = DirectoryState.ReadOnly;
-      return;
-    }
-    this.directoryAccess = DirectoryState.ReadWrite;
   }
 
   renderState() {
@@ -248,7 +259,10 @@ export class FreezeDump extends LitElement {
   }
 
   render() {
-    if (this.directoryAccess === DirectoryState.None) {
+    if (
+      this.directoryAccess === DirectoryState.None ||
+      this.directoryAccess === DirectoryState.Remote
+    ) {
       return html`<freeze-no-source></freeze-no-source>`;
     }
     if (this.directoryAccess === DirectoryState.ReadOnly) {

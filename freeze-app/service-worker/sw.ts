@@ -7,23 +7,25 @@ import {
 import { createPartialResponse } from "workbox-range-requests";
 import { registerRoute } from "workbox-routing";
 import { getRedirectLocation } from "./course-php";
-import { FileSystemDataSource, getSavedFilename } from "./data-source";
+import {
+  DataSource,
+  getSavedFilename,
+  deserializeDataSource,
+} from "./data-source";
 import { RenderableError } from "./errors";
 
 declare let self: ServiceWorkerGlobalScope;
 
 clientsClaim();
 
-let dataSource: FileSystemDataSource | null = null;
+let dataSource: DataSource | null = null;
 
 self.addEventListener("message", (event) => {
   const data = event.data;
   switch (data.op) {
-    case "set_root_handle":
-      dataSource = new FileSystemDataSource(data.data);
-      console.log(
-        `service worker received data source: ${dataSource.rootHandle.name}`
-      );
+    case "set_data_source":
+      dataSource = deserializeDataSource(data.data);
+      console.log(`service worker received data source: ${dataSource?.name}`);
       break;
     case "take_over":
       self.skipWaiting();

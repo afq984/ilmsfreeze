@@ -9,7 +9,13 @@ import "./freeze-course";
 import "./freeze-index";
 import "./freeze-404";
 import { RouterSource, routes } from "./routes";
-import { FileSystemDataSource } from "./data-source";
+import {
+  DataSource,
+  deserializeDataSource,
+  FileSystemDataSource,
+  RemoteDataSource,
+  serializeDataSource,
+} from "./data-source";
 import { IDBPDatabase, openDB } from "idb";
 
 @customElement("freeze-extension-status")
@@ -22,7 +28,7 @@ export class FreezeExtensionStatus extends LitElement {
 
 @customElement("freeze-app")
 export class FreezeApp extends LitElement {
-  rootHandle?: FileSystemDirectoryHandle;
+  dataSource?: DataSource;
   mainRef: Ref<Element> = createRef();
   router: RouterSource;
   db?: IDBPDatabase;
@@ -55,13 +61,31 @@ export class FreezeApp extends LitElement {
         db.createObjectStore("keyval");
       },
     });
-    const cachedHandle = await this.db.get("keyval", "storedHandle");
-    if (cachedHandle !== undefined) {
-      const readPerm = await cachedHandle.queryPermission({ mode: "read" });
-      if (readPerm === "granted") {
-        this.setRootHandle(cachedHandle, true);
-      } else {
-        console.log("Bad read perm:", readPerm);
+
+    const q = new URLSearchParams(window.location.search);
+    const remote = q.get("open");
+    if (remote !== null) {
+      this.setDataSource(new RemoteDataSource(remote));
+      window.history.replaceState("", "", window.location.pathname);
+      return;
+    }
+
+    const serializedSource = await this.db.get("keyval", "storedSource");
+    if (serializedSource !== undefined) {
+      const cachedSource = deserializeDataSource(serializedSource);
+      if (cachedSource !== null) {
+        if (cachedSource instanceof FileSystemDataSource) {
+          const readPerm = await cachedSource.rootHandle.queryPermission({
+            mode: "read",
+          });
+          if (readPerm === "granted") {
+            this.setDataSource(cachedSource, true);
+          } else {
+            console.log("Bad read perm:", readPerm);
+          }
+        } else {
+          this.setDataSource(cachedSource, true);
+        }
       }
     }
   }
@@ -76,10 +100,10 @@ export class FreezeApp extends LitElement {
           );
           registration.addEventListener("updatefound", () => {
             const newWorker = registration.installing;
-            if (this.rootHandle !== undefined) {
+            if (this.dataSource !== undefined) {
               newWorker!.postMessage({
-                op: "set_root_handle",
-                data: this.rootHandle,
+                op: "set_data_source",
+                data: serializeDataSource(this.dataSource),
               });
             }
             newWorker?.postMessage({
@@ -114,26 +138,29 @@ export class FreezeApp extends LitElement {
 
   private async _onClick() {
     const rootHandle = await window.showDirectoryPicker();
-    this.setRootHandle(rootHandle);
+    this.setDataSource(new FileSystemDataSource(rootHandle));
   }
 
   private async _onRequestWrite() {
-    if (this.rootHandle === undefined) {
+    if (this.dataSource === undefined) {
       return;
     }
-    const rw = await this.rootHandle.queryPermission({ mode: "readwrite" });
-    if (rw === "prompt") {
-      await this.rootHandle.requestPermission({ mode: "readwrite" });
-      this.setRootHandle(this.rootHandle);
+    if (this.dataSource instanceof FileSystemDataSource) {
+      const rootHandle = this.dataSource.rootHandle;
+      const rw = await rootHandle.queryPermission({ mode: "readwrite" });
+      if (rw === "prompt") {
+        await rootHandle.requestPermission({ mode: "readwrite" });
+        this.setDataSource(this.dataSource);
+      }
     }
   }
 
-  setRootHandle(rootHandle: FileSystemDirectoryHandle, skipDB = false) {
-    this.rootHandle = rootHandle;
+  setDataSource(dataSource: DataSource, skipDB = false) {
+    this.dataSource = dataSource;
     const options = {
-      detail: rootHandle,
+      detail: this.dataSource,
     };
-    this.router!.dataSource = new FileSystemDataSource(rootHandle);
+    this.router!.dataSource = dataSource;
     this.dispatchEvent(new CustomEvent("directory-changed", options));
 
     if (
@@ -143,18 +170,18 @@ export class FreezeApp extends LitElement {
       console.log("Service worker not available, not sending data source");
     } else {
       navigator.serviceWorker.controller.postMessage({
-        op: "set_root_handle",
-        data: rootHandle,
+        op: "set_data_source",
+        data: serializeDataSource(dataSource),
       });
     }
 
     if (!skipDB) {
-      this.db?.put("keyval", rootHandle, "storedHandle");
+      this.db?.put("keyval", serializeDataSource(dataSource), "storedSource");
     }
-    console.log(`set data source: ${rootHandle.name}`);
+    console.log(`set data source: ${dataSource.name}`);
   }
 
   private async _onSubscribe(e: CustomEvent) {
-    await e.detail(this, this.rootHandle);
+    await e.detail(this, this.dataSource);
   }
 }
