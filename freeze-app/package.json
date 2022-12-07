@@ -32,7 +32,7 @@
     "@web/rollup-plugin-copy": "^0.3.0",
     "@web/rollup-plugin-html": "^1.10.1",
     "@web/test-runner": "^0.13.17",
-    "@web/test-runner-puppeteer": "^0.10.2",
+    "@web/test-runner-puppeteer": "^0.10.5",
     "concurrently": "^6.2.1",
     "deepmerge": "^4.2.2",
     "eslint": "^7.32.0",
