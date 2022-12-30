@@ -21,7 +21,7 @@
     "test:ilmsmock:v": "npm run build:tsc && GOBIN=`npm bin` go install github.com/afq984/ilmsmock/cmd/ilmsmock@latest && ilmsmock --verbose --setenv=ILMS_ORIGIN -- web-test-runner"
   },
   "devDependencies": {
-    "@open-wc/testing": "^2.5.33",
+    "@open-wc/testing": "^3.1.7",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@rollup/plugin-replace": "^3.0.0",
     "@rollup/plugin-typescript": "^8.2.5",
